@@ -1,3 +1,10 @@
+# os
+._*
+.DS_Store
+.idea
+data/
+*.zip
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
