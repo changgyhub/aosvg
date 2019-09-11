@@ -1,5 +1,7 @@
-# vqa_embedding_fusion
-Embedding Fusion in VQA
+# Embedding Fusion in VQA
+Chang Gao, Zhiyu Min, Yujia Chen, and Yongxin Wang
+
+Carnegie Mellon University
 
 ## Paperlist
 TODO
