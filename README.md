@@ -3,5 +3,5 @@ Chang Gao, Zhiyu Min, Yujia Chen, and Yongxin Wang
 
 Carnegie Mellon University
 
-## Paperlist
+## Paper List
 TODO
