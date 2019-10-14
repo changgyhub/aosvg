@@ -32,7 +32,7 @@ We temporally use data and model from "A Fast and Accurate One-Stage Approach to
     tar xf data.tar
     ```
 
-* Model weights: download the pretrained model of [Yolov3](https://pjreddie.com/media/files/yolov3.weights) and [language models](https://uofr-my.sharepoint.com/:f:/g/personal/zyang39_ur_rochester_edu/ErrXDnw1igFGghwbH5daoKwBX4vtE_erXbOo1JGnraCE4Q?e=tQUCk7).Place the files in ``./saved_models``. 
+* Model weights: download the pretrained model of [Yolov3](https://pjreddie.com/media/files/yolov3.weights) and [language models](https://uofr-my.sharepoint.com/:f:/g/personal/zyang39_ur_rochester_edu/ErrXDnw1igFGghwbH5daoKwBX4vtE_erXbOo1JGnraCE4Q?e=tQUCk7). Place the files in ``./saved_models``. 
     ```
     sh saved_models/yolov3_weights.sh
     ```
