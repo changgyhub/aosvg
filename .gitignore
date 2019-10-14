@@ -1,41 +1,14 @@
-# Murel
-murel/logs/*
-murel/logs
-murel/data/*
-murel/data
-murel/bootstrap
-murel/block
-murel/.git_private/*
+# VG
+*.pkl
+data/
+saved_models/
+ln_data/
 
 # Apple
 .DS_Store
 ._.DS_Store
 ._*
 .idea/
-
-# Openvqa
-openvqa/ckpts/
-openvqa/results/cache/*.json
-openvqa/results/cache/*.txt
-openvqa/results/result_test/*.json
-openvqa/results/result_test/*.txt
-openvqa/results/pred/*.pkl
-openvqa/results/log/*.txt
-openvqa/data/clevr/raw/images/
-openvqa/data/clevr/raw/questions/
-openvqa/data/clevr/raw/scenes/
-openvqa/data/clevr/feats/train/
-openvqa/data/clevr/feats/val/
-openvqa/data/clevr/feats/test/
-openvqa/data/gqa/raw/eval/
-openvqa/data/gqa/raw/questions1.2/
-openvqa/data/gqa/raw/sceneGraphs/
-openvqa/data/gqa/feats/gqa-frcn/
-openvqa/data/gqa/feats/gqa-grid/
-openvqa/data/vqa/raw/*.json
-openvqa/data/vqa/feats/train2014/
-openvqa/data/vqa/feats/val2014/
-openvqa/data/vqa/feats/test2015/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
