@@ -1,14 +1,7 @@
 # Attended One-Stage Visual Grounding
 
-### Based on
+Chang Gao, Yongxin Wang, Zhiyu Min, Yujia Chen
 
-    @inproceedings{yang2019fast,
-      title={A Fast and Accurate One-Stage Approach to Visual Grounding},
-      author={Yang, Zhengyuan and Gong, Boqing and Wang, Liwei and Huang
-        , Wenbing and Yu, Dong and Luo, Jiebo},
-      booktitle={ICCV},
-      year={2019}
-    }
 ## Installation
 
 1. Setup python environment
@@ -68,6 +61,17 @@ Using flag ``--test`` to access test mode.
 
 
 ### Credits
+
+Based on
+
+    @inproceedings{yang2019fast,
+      title={A Fast and Accurate One-Stage Approach to Visual Grounding},
+      author={Yang, Zhengyuan and Gong, Boqing and Wang, Liwei and Huang
+        , Wenbing and Yu, Dong and Luo, Jiebo},
+      booktitle={ICCV},
+      year={2019}
+    }
+
 Part of the code or models are from 
 [One-Stage Visual Grounding](https://github.com/zyang-ur/onestage_grounding),
 [DMS](https://github.com/BCV-Uniandes/DMS),
