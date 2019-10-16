@@ -123,10 +123,11 @@ if __name__ == "__main__":
         for dataset in datasets:
             label_file = label_file_path.format(dataset)
             images = torch.load(label_file)
+            print(type(images))
+            print(type(images[0]))
             new_images = []
             for i in range(len(images)):
                 image_file, bbox, phrase = images[i]
-                print(type(bbox))
 
                 phrase = phrase.lower()
 
@@ -143,4 +144,5 @@ if __name__ == "__main__":
                 bert_feature = (all_encoder_layers[-1][:,0,:] + all_encoder_layers[-2][:,0,:] + all_encoder_layers[-3][:,0,:] + all_encoder_layers[-4][:,0,:])/4
                 
                 bert_feature = bert_feature.data.cpu().numpy().flatten()
+                new_images.append((image_file, bbox, bert_feature))
             
