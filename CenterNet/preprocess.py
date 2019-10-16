@@ -112,7 +112,7 @@ if __name__ == "__main__":
     with torch.no_grad():
         bert_model = "bert-base-uncased"
         max_query_len = 128
-        textmodel = BertModel.from_pretrained(bert_model)
+        textmodel = BertModel.from_pretrained(bert_model).cuda()
         tokenizer = BertTokenizer.from_pretrained(bert_model, do_lower_case=True)
         
         datasets = ("flickr_train", "flickr_val", "flickr_test")
@@ -126,6 +126,8 @@ if __name__ == "__main__":
             images = torch.load(label_file)
             new_images = []
             for i in range(len(images)):
+                if (len(images) % i) == (len(images) // 100):
+                    print("Dataset {} {}/{}".format(dataset, i, len(images)))
                 image_file, bbox, phrase = images[i]
 
                 phrase = phrase.lower()
