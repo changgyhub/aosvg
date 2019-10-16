@@ -130,12 +130,12 @@ def make_hg_layer(kernel, dim0, dim1, mod, layer=convolution, **kwargs):
 
 class model(kp):
     def __init__(self, db):
+
+        ## Visual model
         n       = 5
         dims    = [256, 256, 384, 384, 384, 512]
         modules = [2, 2, 2, 2, 2, 4]
         out_dim = 1
-
-        ## Visual model and pre-set text model
         super(model, self).__init__(
             db, n, 1, dims, modules, out_dim,
             make_tl_layer=make_tl_layer,
@@ -146,17 +146,13 @@ class model(kp):
             kp_layer=residual, cnv_dim=256
         )
 
-        if self.bert_model == 'bert-base-uncased':
-            self.textdim = 768
-        else:
-            self.textdim = 1024
-
         ## Text model
         emb_size = 256
         dropout_ratio = 0.1
+        textdim = 768 if self.bert_model == 'bert-base-uncased' else 1024
         self.textmodel = BertModel.from_pretrained(self.bert_model)
         self.mapping_lang = torch.nn.Sequential(
-            nn.Linear(self.textdim, emb_size),
+            nn.Linear(textdim, emb_size),
             nn.BatchNorm1d(emb_size),
             nn.ReLU(),
             nn.Dropout(dropout_ratio),
