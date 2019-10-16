@@ -115,16 +115,15 @@ if __name__ == "__main__":
         textmodel = BertModel.from_pretrained(bert_model)
         tokenizer = BertTokenizer.from_pretrained(bert_model, do_lower_case=True)
         
-
         datasets = ("flickr_train", "flickr_val", "flickr_test")
         label_dir  = os.path.join("data", "flickr")
         label_file_path = os.path.join(label_dir, "{}.pth")
+        new_label_file_path = os.path.join(label_dir, "{}_" + bert_model + "-" + max_query_len + ".pth")
 
         for dataset in datasets:
             label_file = label_file_path.format(dataset)
+            new_label_file = new_label_file_path.format(dataset)
             images = torch.load(label_file)
-            print(type(images))
-            print(type(images[0]))
             new_images = []
             for i in range(len(images)):
                 image_file, bbox, phrase = images[i]
@@ -145,4 +144,4 @@ if __name__ == "__main__":
                 
                 bert_feature = bert_feature.data.cpu().numpy().flatten()
                 new_images.append((image_file, bbox, bert_feature))
-            
+            torch.save(new_images, new_label_file)
