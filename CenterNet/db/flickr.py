@@ -245,15 +245,13 @@ class FLICKR(DETECTION):
                     "pred_bbox": pred_bbox,
                     "score": float("{:.2f}".format(score))
                 }
-                if len(detections) == 0:
-                    print(detection)
                 detections.append(detection)
         return detections
 
     def evaluate(self, best_bboxes):
         acc = 0.0
         for db_ind in best_bboxes:
-            if best_bboxes[db_ind]:
+            if best_bboxes[db_ind] is not None:
                 gt_bbox = self.images[db_ind][1]
                 pred_bbox = best_bboxes[db_ind][:4]
                 iou = bbox_iou(pred_bbox, gt_bbox, x1y1x2y2=True)
