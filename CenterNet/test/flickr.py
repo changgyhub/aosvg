@@ -127,7 +127,11 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             sizes[0]   = [int(height * scale), int(width * scale)]
             ratios[0]  = [height_ratio, width_ratio]       
 
+            # Flip to perform detection twice
             images = np.concatenate((images, images[:, :, :, ::-1]), axis=0)
+            word_ids = np.concatenate((word_ids, word_ids), axis=0)
+            word_masks = np.concatenate((word_masks, word_masks), axis=0)
+
             images = torch.from_numpy(images)
             word_ids = torch.from_numpy(word_ids)
             word_masks = torch.from_numpy(word_masks)

@@ -294,9 +294,7 @@ class kp(nn.Module):
 
     def _test(self, *xs, **kwargs):
         image      = xs[0]
-        print(image.shape)
         word_id    = xs[1]
-        print(word_id.shape)
         word_mask  = xs[2]
 
         inter = self.pre(image)
