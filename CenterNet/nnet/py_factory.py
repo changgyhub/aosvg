@@ -123,7 +123,10 @@ class NetworkFactory(object):
         with open(pretrained_model, "rb") as f:
             params = torch.load(f)
             model_state = self.model.state_dict()
-            model_state.update({k: v for k, v in params.items() if k in model_state and v.size() == model_state[k].size()})
+            params = {k: v for k, v in params.items() if k in model_state and v.size() == model_state[k].size()}
+            for k in params:
+                print('Load {} with shape {}'.format(k, params[k].shape))
+            model_state.update(params)
             self.model.load_state_dict(model_state)
 
     def load_params(self, iteration):
