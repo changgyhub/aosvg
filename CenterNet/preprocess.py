@@ -131,8 +131,8 @@ if __name__ == "__main__":
                 ## encode phrase to bert input
                 examples = read_examples(phrase, i)
                 features = convert_examples_to_features(examples=examples, seq_length=max_query_len, tokenizer=tokenizer)
-                word_id = features[0].input_ids
-                word_mask = features[0].input_mask
+                word_id = np.array(features[0].input_ids, dtype=int)
+                word_mask = np.array(features[0].input_mask, dtype=int)
 
                 word_id = torch.from_numpy(word_id)
                 word_mask = torch.from_numpy(word_mask)
