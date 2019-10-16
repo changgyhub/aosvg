@@ -1,4 +1,5 @@
 import os
+import re
 import torch
 
 from pytorch_pretrained_bert.tokenization import BertTokenizer
