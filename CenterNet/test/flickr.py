@@ -289,5 +289,5 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode, parti
     db.evaluate(best_bboxes)
     return 0
 
-def testing(db, nnet, result_dir, debug=False):
-    return globals()[system_configs.sampling_function](db, nnet, result_dir, debug=debug)
+def testing(db, nnet, result_dir, debug=False, partial=False):
+    return globals()[system_configs.sampling_function](db, nnet, result_dir, debug=debug, partial=partial)
