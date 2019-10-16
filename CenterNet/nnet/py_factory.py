@@ -124,7 +124,6 @@ class NetworkFactory(object):
             params = torch.load(f)
             model_state = self.model.state_dict()
             model_state.update({k: v for k, v in params.items() if k in model_state and v.size() == model_state[k].size()})
-            print('Load states: {}'.format(model_state.keys()))
             self.model.load_state_dict(model_state)
 
     def load_params(self, iteration):
