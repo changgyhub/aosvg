@@ -143,8 +143,8 @@ class kp(nn.Module):
         # Language Attention module
         self.coordmap = self._db.configs["coordmap"]
         self.bert_model = self._db.configs["bert_model"]
-        self.textmodel = nn.Identity()
-        self.mapping_lang = nn.Identity()
+        self.textmodel = lambda x: x
+        self.mapping_lang = lambda x: x
         # ============================================
 
         self.tl_cnvs = nn.ModuleList([
