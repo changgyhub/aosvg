@@ -182,11 +182,8 @@ class FLICKR(DETECTION):
 
         self.images = []
         self.images += torch.load(self._label_file)
-        
-        self.seq_length = self._configs["max_query_len"]
-        self.bert_model = self._configs["bert_model"]
 
-        self.tokenizer = BertTokenizer.from_pretrained(self.bert_model, do_lower_case=True)
+        self.tokenizer = BertTokenizer.from_pretrained(self._configs["bert_model"], do_lower_case=True)
 
         self._mean = np.array([0.40789654, 0.44719302, 0.47026115], dtype=np.float32)
         self._std  = np.array([0.28863828, 0.27408164, 0.27809835], dtype=np.float32)
@@ -224,7 +221,7 @@ class FLICKR(DETECTION):
 
         ## encode phrase to bert input
         examples = read_examples(phrase, idx)
-        features = convert_examples_to_features(examples=examples, seq_length=seq_length, tokenizer=self.tokenizer)
+        features = convert_examples_to_features(examples=examples, seq_length=self._configs["max_query_len"], tokenizer=self.tokenizer)
         word_id = features[0].input_ids
         word_mask = features[0].input_mask
         
