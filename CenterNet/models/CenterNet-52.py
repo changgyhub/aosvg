@@ -135,7 +135,7 @@ class model(kp):
         modules = [2, 2, 2, 2, 2, 4]
         out_dim = 1
 
-        ## Visual model
+        ## Visual model and pre-set text model
         super(model, self).__init__(
             db, n, 1, dims, modules, out_dim,
             make_tl_layer=make_tl_layer,
@@ -152,7 +152,18 @@ class model(kp):
             self.textdim = 1024
 
         ## Text model
+        emb_size = 256
+        dropout_ratio = 0.1
         self.textmodel = BertModel.from_pretrained(self.bert_model)
+        self.mapping_lang = torch.nn.Sequential(
+            nn.Linear(self.textdim, emb_size),
+            nn.BatchNorm1d(emb_size),
+            nn.ReLU(),
+            nn.Dropout(dropout_ratio),
+            nn.Linear(emb_size, emb_size),
+            nn.BatchNorm1d(emb_size),
+            nn.ReLU(),
+        )
 
 
 loss = AELoss(pull_weight=1e-1, push_weight=1e-1, focal_loss=_neg_loss)
