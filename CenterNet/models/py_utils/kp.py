@@ -328,15 +328,11 @@ class kp(nn.Module):
             # Language Attention module
             all_encoder_layers, _ = self.textmodel(word_id, token_type_ids=None, attention_mask=word_mask)
             raw_flang = (all_encoder_layers[-1][:,0,:] + all_encoder_layers[-2][:,0,:] + all_encoder_layers[-3][:,0,:] + all_encoder_layers[-4][:,0,:])/4
-            print(raw_flang.shape)
             flang = self.mapping_lang(raw_flang)
-            print(flang.shape)
             flang = F.normalize(flang, p=2, dim=1)
-            print(flang.shape)
             flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
             if self.coordmap:
                 coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
-                print(cnv.shape, flang_tile.shape, coord.shape)
                 cnv = torch.cat([cnv, flang_tile, coord], dim=1)
             else:
                 cnv = torch.cat([cnv, flang_tile], dim=1)

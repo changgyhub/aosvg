@@ -109,6 +109,9 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             borders     = np.zeros((1, 4), dtype=np.float32)
             sizes       = np.zeros((1, 2), dtype=np.float32)
 
+            word_ids[0] = word_id
+            word_masks[0] = word_mask
+
             out_height, out_width = (inp_height + 1) // 4, (inp_width + 1) // 4
             height_ratio = out_height / inp_height
             width_ratio  = out_width  / inp_width
