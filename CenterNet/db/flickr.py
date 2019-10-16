@@ -175,7 +175,7 @@ class FLICKR(DETECTION):
         self._label_file = os.path.join(self._label_dir, "{}.pth")
         self._label_file = self._label_file.format(self._dataset)
 
-        self._image_dir  = os.path.join(data_dir, "flickr30k_images")
+        self._image_dir  = os.path.join(data_dir, "flickr", "flickr30k_images")
 
         self._data = "flickr"
 
