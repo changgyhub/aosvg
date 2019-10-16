@@ -254,7 +254,7 @@ class FLICKR(DETECTION):
             if best_bboxes[db_ind] is not None:
                 gt_bbox = self.images[db_ind][1]
                 pred_bbox = best_bboxes[db_ind][:4]
-                iou = bbox_iou(pred_bbox, gt_bbox, x1y1x2y2=True)
+                iou = bbox_iou(pred_bbox, gt_bbox)
                 if iou > 0.5:
                     acc += 1.0
         acc = acc / len(self._db_inds)
