@@ -5,8 +5,8 @@
 1. Setup python environment
 
 ```bash
-conda create -n aosvg python=3.5 anaconda
-source activate aosvg
+conda create -n vg python=3.5 anaconda
+source activate vg
 
 conda install pytorch=0.4.1 -c pytorch
 conda install torchvision
