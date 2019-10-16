@@ -74,6 +74,7 @@ def train(training_dbs, validation_db, start_iter=0):
     display          = system_configs.display
     decay_rate       = system_configs.decay_rate
     stepsize         = system_configs.stepsize
+    result_dir       = system_configs.result_dir
 
     # getting the size of each database
     training_size   = len(training_dbs[0].db_inds)
@@ -153,6 +154,9 @@ def train(training_dbs, validation_db, start_iter=0):
                 validation = pinned_validation_queue.get(block=True)
                 validation_loss = nnet.validate(**validation)
                 print("validation loss at iteration {}: {}".format(iteration, validation_loss.item()))
+                validation_file = "test.{}".format(validation_db.data)
+                validating = importlib.import_module(validation_file).testing
+                validating(validation_db, nnet, result_dir)
                 nnet.train_mode()
 
             if iteration % snapshot == 0:
