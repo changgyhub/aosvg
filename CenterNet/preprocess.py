@@ -118,7 +118,7 @@ if __name__ == "__main__":
         datasets = ("flickr_train", "flickr_val", "flickr_test")
         label_dir  = os.path.join("data", "flickr")
         label_file_path = os.path.join(label_dir, "{}.pth")
-        new_label_file_path = os.path.join(label_dir, "{}_" + bert_model + "-" + max_query_len + ".pth")
+        new_label_file_path = os.path.join(label_dir, "{}_" + bert_model + "-" + str(max_query_len) + ".pth")
 
         for dataset in datasets:
             label_file = label_file_path.format(dataset)

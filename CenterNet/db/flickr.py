@@ -82,7 +82,7 @@ class FLICKR(DETECTION):
         self._db_inds = np.arange(len(self.images))
     
     def pull_item(self, idx):
-        image_file, bbox, phrase = self.images[idx]
+        image_file, bbox, bert_feature = self.images[idx]
         ## box format: x1y1x2y2
         bbox = np.array(bbox, dtype=int)
         image_path = os.path.join(self._image_dir, image_file)
@@ -92,22 +92,14 @@ class FLICKR(DETECTION):
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         else:
             image = np.stack([image] * 3)
-        return image, phrase, bbox
+        return image, bert_feature, bbox
 
     def detections(self, idx):
-        image, phrase, bbox = self.pull_item(idx)
-        # phrase = phrase.decode("utf-8").encode().lower()
-        phrase = phrase.lower()
-
-        ## encode phrase to bert input
-        examples = read_examples(phrase, idx)
-        features = convert_examples_to_features(examples=examples, seq_length=self._configs["max_query_len"], tokenizer=self.tokenizer)
-        word_id = features[0].input_ids
-        word_mask = features[0].input_mask
+        image, bert_feature, bbox = self.pull_item(idx)
         
         detections = np.ones((1, 5), dtype=np.float32)
         detections[:, :4] = bbox
-        return image, np.array(word_id, dtype=int), np.array(word_mask, dtype=int), detections
+        return image, bert_feature, detections
 
     def _to_float(self, x):
         return float("{:.2f}".format(x))
