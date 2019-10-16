@@ -150,13 +150,14 @@ def train(training_dbs, validation_db, start_iter=0):
             del training_loss, focal_loss, pull_loss, push_loss, regr_loss#, cls_loss
 
             if val_iter and validation_db.db_inds.size and iteration % val_iter == 0:
-                nnet.eval_mode()
-                validation = pinned_validation_queue.get(block=True)
-                validation_loss = nnet.validate(**validation)
-                print("validation loss at iteration {}: {}".format(iteration, validation_loss.item()))
-                validation_file = "test.{}".format(validation_db.data)
-                validating = importlib.import_module(validation_file).testing
-                validating(validation_db, nnet, result_dir)
+                with torch.no_grad():
+                    nnet.eval_mode()
+                    validation = pinned_validation_queue.get(block=True)
+                    validation_loss = nnet.validate(**validation)
+                    print("validation loss at iteration {}: {}".format(iteration, validation_loss.item()))
+                    validation_file = "test.{}".format(validation_db.data)
+                    validating = importlib.import_module(validation_file).testing
+                    validating(validation_db, nnet, result_dir)
                 nnet.train_mode()
 
             if iteration % snapshot == 0:
