@@ -143,12 +143,9 @@ class kp(nn.Module):
         # Language Attention module
         self.coordmap = self._db.configs["coordmap"]
         self.bert_model = self._db.configs["bert_model"]
-        self.fusion_dim = cnv_dim
         self.textmodel = lambda x: x
         self.mapping_lang = lambda x: x
-        self.fusion_layers = nn.ModuleList([
-            make_cnv_layer(self.fusion_dim, cnv_dim) for _ in range(nstack)
-        ])
+        self.fusion_layers = lambda x: x
         # ============================================
 
         self.tl_cnvs = nn.ModuleList([

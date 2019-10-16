@@ -137,8 +137,9 @@ class model(kp):
         modules = [2, 2, 2, 2, 2, 4]
         out_dim = 1
         cnv_dim = 256
+        nstack = 1
         super(model, self).__init__(
-            db, n, 1, dims, modules, out_dim,
+            db, n, nstack, dims, modules, out_dim,
             make_tl_layer=make_tl_layer,
             make_br_layer=make_br_layer,
             make_ct_layer=make_ct_layer,
@@ -151,6 +152,8 @@ class model(kp):
         emb_size = 256
         dropout_ratio = 0.1
         textdim = 768 if self.bert_model == 'bert-base-uncased' else 1024
+        fusion_dim = 520
+
         self.textmodel = BertModel.from_pretrained(self.bert_model)
         self.mapping_lang = torch.nn.Sequential(
             nn.Linear(textdim, emb_size),
@@ -161,7 +164,9 @@ class model(kp):
             nn.BatchNorm1d(emb_size),
             nn.ReLU(),
         )
-        self.fusion_dim = 520
+        self.fusion_layers = nn.ModuleList([
+            make_cnv_layer(fusion_dim, cnv_dim) for _ in range(nstack)
+        ])
 
 
 loss = AELoss(pull_weight=1e-1, push_weight=1e-1, focal_loss=_neg_loss)
