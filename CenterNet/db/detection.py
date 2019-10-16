@@ -42,6 +42,8 @@ class DETECTION(BASE):
         self._configs["bert_model"]      = "bert-base-uncased"
         self._configs["max_query_len"]   = 128
 
+        self._configs["fix_visual"]      = False
+
         self._configs["test_scales"]     = [1]
 
         self._train_cfg["rcnn"] = dict(
