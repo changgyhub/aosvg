@@ -143,8 +143,12 @@ class kp(nn.Module):
         # Language Attention module
         self.coordmap = self._db.configs["coordmap"]
         self.bert_model = self._db.configs["bert_model"]
+        self.fusion_dim = cnv_dim
         self.textmodel = lambda x: x
         self.mapping_lang = lambda x: x
+        self.fusion_layers = nn.ModuleList([
+            make_cnv_layer(self.fusion_dim, cnv_dim) for _ in range(nstack)
+        ])
         # ============================================
 
         self.tl_cnvs = nn.ModuleList([
@@ -230,7 +234,8 @@ class kp(nn.Module):
             self.br_heats, self.ct_heats,
             self.tl_tags,  self.br_tags,
             self.tl_regrs, self.br_regrs,
-            self.ct_regrs
+            self.ct_regrs,
+            self.fusion_layers
         )
         for ind, layer in enumerate(layers):
             kp_, cnv_          = layer[0:2]
@@ -240,6 +245,7 @@ class kp(nn.Module):
             tl_tag_,  br_tag_  = layer[8:10]
             tl_regr_,  br_regr_ = layer[10:12]
             ct_regr_         = layer[12]
+            fusion_layer = layer[13]
 
             # # We fix the feature extracter with pre-trained model.
             # with torch.no_grad():
@@ -259,6 +265,7 @@ class kp(nn.Module):
                 cnv = torch.cat([cnv, flang_tile, coord], dim=1)
             else:
                 cnv = torch.cat([cnv, flang_tile], dim=1)
+            cnv = fusion_layer(cnv)
             # ============================================     
 
             tl_cnv = tl_cnv_(cnv)
@@ -300,7 +307,8 @@ class kp(nn.Module):
             self.br_heats, self.ct_heats,
             self.tl_tags,  self.br_tags,
             self.tl_regrs, self.br_regrs,
-            self.ct_regrs
+            self.ct_regrs,
+            self.fusion_layers
         )
         for ind, layer in enumerate(layers):
             kp_, cnv_          = layer[0:2]
@@ -310,6 +318,7 @@ class kp(nn.Module):
             tl_tag_,  br_tag_  = layer[8:10]
             tl_regr_,  br_regr_ = layer[10:12]
             ct_regr_         = layer[12]
+            fusion_layer = layer[13]
 
             kp  = kp_(inter)
             cnv = cnv_(kp)
@@ -327,6 +336,7 @@ class kp(nn.Module):
                 cnv = torch.cat([cnv, flang_tile, coord], dim=1)
             else:
                 cnv = torch.cat([cnv, flang_tile], dim=1)
+            cnv = fusion_layer(cnv)
             # ============================================     
 
             if ind == self.nstack - 1:

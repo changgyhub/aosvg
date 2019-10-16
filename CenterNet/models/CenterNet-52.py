@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from .py_utils import kp, AELoss, _neg_loss, convolution, residual
+from .py_utils import kp, AELoss, _neg_loss, convolution, residual, make_cnv_layer
 from .py_utils import TopPool, BottomPool, LeftPool, RightPool
 
 from pytorch_pretrained_bert.tokenization import BertTokenizer
@@ -136,6 +136,7 @@ class model(kp):
         dims    = [256, 256, 384, 384, 384, 512]
         modules = [2, 2, 2, 2, 2, 4]
         out_dim = 1
+        cnv_dim = 256
         super(model, self).__init__(
             db, n, 1, dims, modules, out_dim,
             make_tl_layer=make_tl_layer,
@@ -143,7 +144,7 @@ class model(kp):
             make_ct_layer=make_ct_layer,
             make_pool_layer=make_pool_layer,
             make_hg_layer=make_hg_layer,
-            kp_layer=residual, cnv_dim=256
+            kp_layer=residual, cnv_dim=cnv_dim
         )
 
         ## Text model
@@ -160,6 +161,7 @@ class model(kp):
             nn.BatchNorm1d(emb_size),
             nn.ReLU(),
         )
+        self.fusion_dim = 520
 
 
 loss = AELoss(pull_weight=1e-1, push_weight=1e-1, focal_loss=_neg_loss)
