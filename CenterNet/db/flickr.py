@@ -180,8 +180,7 @@ class FLICKR(DETECTION):
 
         self._data = "flickr"
 
-        self.images = []
-        self.images += torch.load(self._label_file)
+        self.images = torch.load(self._label_file)
 
         self.tokenizer = BertTokenizer.from_pretrained(self._configs["bert_model"], do_lower_case=True)
 
