@@ -1,6 +1,4 @@
-# Attended One-Stage Visual Grounding
-
-Chang Gao, Yongxin Wang, Zhiyu Min, Yujia Chen
+# One-Stage Visual Grounding
 
 ## Installation
 
