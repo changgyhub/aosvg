@@ -263,6 +263,7 @@ class kp(nn.Module):
             flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
             if self.coordmap:
                 coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
+                print(cnv.shape, flang_tile.shape, coord.shape)
                 cnv = torch.cat([cnv, flang_tile, coord], dim=1)
             else:
                 cnv = torch.cat([cnv, flang_tile], dim=1)
@@ -334,6 +335,7 @@ class kp(nn.Module):
             flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
             if self.coordmap:
                 coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
+                print(cnv.shape, flang_tile.shape, coord.shape)
                 cnv = torch.cat([cnv, flang_tile, coord], dim=1)
             else:
                 cnv = torch.cat([cnv, flang_tile], dim=1)
