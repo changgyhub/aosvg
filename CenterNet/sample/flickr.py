@@ -68,9 +68,8 @@ def kp_detection(db, k_ind, data_aug, debug):
     max_tag_len = 128
 
     # allocating memory
-    images      = np.zeros((batch_size, 3, input_size[0], input_size[1]), dtype=np.float32)
-    word_ids    = np.zeros((batch_size, seq_length), dtype=np.int)
-    word_masks  = np.zeros((batch_size, seq_length), dtype=np.int)
+    images        = np.zeros((batch_size, 3, input_size[0], input_size[1]), dtype=np.float32)
+    bert_features = np.zeros((batch_size, seq_length), dtype=np.int)
     tl_hms = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
     br_hms = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
     ct_hms = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)

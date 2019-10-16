@@ -4,9 +4,6 @@ import torch.nn as nn
 from .py_utils import kp, AELoss, _neg_loss, convolution, residual, make_cnv_layer
 from .py_utils import TopPool, BottomPool, LeftPool, RightPool
 
-from pytorch_pretrained_bert.tokenization import BertTokenizer
-from pytorch_pretrained_bert.modeling import BertModel
-
 
 class pool(nn.Module):
     def __init__(self, dim, pool1, pool2):
@@ -154,7 +151,6 @@ class model(kp):
         textdim = 768 if self.bert_model == 'bert-base-uncased' else 1024
         fusion_dim = 520
 
-        self.textmodel = BertModel.from_pretrained(self.bert_model)
         self.mapping_lang = torch.nn.Sequential(
             nn.Linear(textdim, emb_size),
             nn.BatchNorm1d(emb_size),

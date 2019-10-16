@@ -144,8 +144,6 @@ class kp(nn.Module):
         # ============================================
         # Language Attention module
         self.coordmap = self._db.configs["coordmap"]
-        self.bert_model = self._db.configs["bert_model"]
-        self.textmodel = lambda x: x
         self.mapping_lang = lambda x: x
         self.fusion_layers = lambda x: x
         # ============================================
@@ -216,12 +214,11 @@ class kp(nn.Module):
         self.relu = nn.ReLU(inplace=True)
 
     def _train(self, *xs):
-        image      = xs[0]
-        word_id    = xs[1]
-        word_mask  = xs[2]
-        tl_inds    = xs[3]
-        br_inds    = xs[4]
-        ct_inds    = xs[5]
+        image        = xs[0]
+        bert_feature = xs[1]
+        tl_inds      = xs[2]
+        br_inds      = xs[3]
+        ct_inds      = xs[4]
 
         inter      = self.pre(image)
         outs       = []
@@ -255,10 +252,7 @@ class kp(nn.Module):
 
             # ============================================
             # Language Attention module
-            all_encoder_layers, _ = self.textmodel(word_id, token_type_ids=None, attention_mask=word_mask)
-            raw_flang = (all_encoder_layers[-1][:,0,:] + all_encoder_layers[-2][:,0,:] + all_encoder_layers[-3][:,0,:] + all_encoder_layers[-4][:,0,:])/4
-            raw_flang = raw_flang.detach()
-            flang = self.mapping_lang(raw_flang)
+            flang = self.mapping_lang(bert_feature)
             flang = F.normalize(flang, p=2, dim=1)
             flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
             if self.coordmap:
@@ -293,9 +287,8 @@ class kp(nn.Module):
         return outs
 
     def _test(self, *xs, **kwargs):
-        image      = xs[0]
-        word_id    = xs[1]
-        word_mask  = xs[2]
+        image        = xs[0]
+        bert_feature = xs[1]
 
         inter = self.pre(image)
 
@@ -326,9 +319,7 @@ class kp(nn.Module):
 
             # ============================================
             # Language Attention module
-            all_encoder_layers, _ = self.textmodel(word_id, token_type_ids=None, attention_mask=word_mask)
-            raw_flang = (all_encoder_layers[-1][:,0,:] + all_encoder_layers[-2][:,0,:] + all_encoder_layers[-3][:,0,:] + all_encoder_layers[-4][:,0,:])/4
-            flang = self.mapping_lang(raw_flang)
+            flang = self.mapping_lang(bert_feature)
             flang = F.normalize(flang, p=2, dim=1)
             flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
             if self.coordmap:
@@ -359,7 +350,7 @@ class kp(nn.Module):
         return self._decode(*outs[-8:], **kwargs)
 
     def forward(self, *xs, **kwargs):
-        if len(xs) > 3:
+        if len(xs) > 2:
             return self._train(*xs, **kwargs)
         return self._test(*xs, **kwargs)
 

@@ -80,11 +80,14 @@ class FLICKR(DETECTION):
         self._coco_to_class_map = {1: 1}
 
         self._db_inds = np.arange(len(self.images))
-    
-    def pull_item(self, idx):
-        image_file, bbox, bert_feature = self.images[idx]
+
+    def detections(self, idx):
+        image_file, bbox, _, bert_feature = self.images[idx]  # phrase is not used
         ## box format: x1y1x2y2
         bbox = np.array(bbox, dtype=int)
+        detections = np.ones((1, 5), dtype=np.float32)
+        detections[:, :4] = bbox
+
         image_path = os.path.join(self._image_dir, image_file)
         image = cv2.imread(image_path)
         ## duplicate channel if gray image
@@ -92,13 +95,6 @@ class FLICKR(DETECTION):
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         else:
             image = np.stack([image] * 3)
-        return image, bert_feature, bbox
-
-    def detections(self, idx):
-        image, bert_feature, bbox = self.pull_item(idx)
-        
-        detections = np.ones((1, 5), dtype=np.float32)
-        detections[:, :4] = bbox
         return image, bert_feature, detections
 
     def _to_float(self, x):
