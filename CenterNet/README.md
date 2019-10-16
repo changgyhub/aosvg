@@ -13,6 +13,11 @@ After you create the environment, activate it.
 source activate CenterNet
 ```
 
+Also install bert with
+```
+pip install pytorch-pretrained-bert
+```
+
 ## Compiling Corner Pooling Layers
 ```
 cd <CenterNet dir>/models/py_utils/_cpools/
