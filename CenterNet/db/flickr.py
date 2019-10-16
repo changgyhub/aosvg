@@ -13,9 +13,6 @@ from tqdm import tqdm
 from db.detection import DETECTION
 from config import system_configs
 
-from pytorch_pretrained_bert.tokenization import BertTokenizer
-from pytorch_pretrained_bert.modeling import BertModel
-
 
 def bbox_iou(box1, box2):
     """
@@ -55,7 +52,7 @@ class FLICKR(DETECTION):
         }[self._split]
         
         self._label_dir  = os.path.join(data_dir, "flickr")
-        self._label_file = os.path.join(self._label_dir, "{}.pth")
+        self._label_file = os.path.join(self._label_dir, "{}_" + self._configs["bert_model"] + "-" + str(self._configs["max_query_len"]) + ".pth")
         self._label_file = self._label_file.format(self._dataset)
 
         self._image_dir  = os.path.join(data_dir, "flickr", "flickr30k_images")
@@ -63,8 +60,6 @@ class FLICKR(DETECTION):
         self._data = "flickr"
 
         self.images = torch.load(self._label_file)
-
-        self.tokenizer = BertTokenizer.from_pretrained(self._configs["bert_model"], do_lower_case=True)
 
         self._mean = np.array([0.40789654, 0.44719302, 0.47026115], dtype=np.float32)
         self._std  = np.array([0.28863828, 0.27408164, 0.27809835], dtype=np.float32)
