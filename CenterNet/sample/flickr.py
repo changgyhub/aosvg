@@ -71,9 +71,9 @@ def kp_detection(db, k_ind, data_aug, debug):
     images      = np.zeros((batch_size, 3, input_size[0], input_size[1]), dtype=np.float32)
     word_ids    = np.zeros((batch_size, seq_length), dtype=np.int)
     word_masks  = np.zeros((batch_size, seq_length), dtype=np.int)
-    tl_heatmaps = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
-    br_heatmaps = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
-    ct_heatmaps = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
+    tl_hms = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
+    br_hms = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
+    ct_hms = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
     tl_regrs    = np.zeros((batch_size, max_tag_len, 2), dtype=np.float32)
     br_regrs    = np.zeros((batch_size, max_tag_len, 2), dtype=np.float32)
     ct_regrs    = np.zeros((batch_size, max_tag_len, 2), dtype=np.float32)
@@ -158,14 +158,14 @@ def kp_detection(db, k_ind, data_aug, debug):
                 else:
                     radius = gaussian_rad
 
-                draw_gaussian(tl_heatmaps[b_ind, category], [xtl, ytl], radius)
-                draw_gaussian(br_heatmaps[b_ind, category], [xbr, ybr], radius)
-                draw_gaussian(ct_heatmaps[b_ind, category], [xct, yct], radius, delte = 5)
+                draw_gaussian(tl_hms[b_ind, category], [xtl, ytl], radius)
+                draw_gaussian(br_hms[b_ind, category], [xbr, ybr], radius)
+                draw_gaussian(ct_hms[b_ind, category], [xct, yct], radius, delte = 5)
 
             else:
-                tl_heatmaps[b_ind, category, ytl, xtl] = 1
-                br_heatmaps[b_ind, category, ybr, xbr] = 1
-                ct_heatmaps[b_ind, category, yct, xct] = 1
+                tl_hms[b_ind, category, ytl, xtl] = 1
+                br_hms[b_ind, category, ybr, xbr] = 1
+                ct_hms[b_ind, category, yct, xct] = 1
 
             tag_ind                      = tag_lens[b_ind]
             tl_regrs[b_ind, tag_ind, :]  = [fxtl - xtl, fytl - ytl]
@@ -183,9 +183,9 @@ def kp_detection(db, k_ind, data_aug, debug):
     images      = torch.from_numpy(images)
     word_ids    = torch.from_numpy(word_ids)
     word_masks  = torch.from_numpy(word_masks)
-    tl_heatmaps = torch.from_numpy(tl_heatmaps)
-    br_heatmaps = torch.from_numpy(br_heatmaps)
-    ct_heatmaps = torch.from_numpy(ct_heatmaps)
+    tl_hms      = torch.from_numpy(tl_hms)
+    br_hms      = torch.from_numpy(br_hms)
+    ct_hms      = torch.from_numpy(ct_hms)
     tl_regrs    = torch.from_numpy(tl_regrs)
     br_regrs    = torch.from_numpy(br_regrs)
     ct_regrs    = torch.from_numpy(ct_regrs)
@@ -196,7 +196,7 @@ def kp_detection(db, k_ind, data_aug, debug):
 
     return {
         "xs": [images, word_ids, word_masks, tl_tags, br_tags, ct_tags],
-        "ys": [tl_heatmaps, br_heatmaps, ct_heatmaps, tag_masks, tl_regrs, br_regrs, ct_regrs]
+        "ys": [tl_hms, br_hms, ct_hms, tag_masks, tl_regrs, br_regrs, ct_regrs]
     }, k_ind
 
 def sample_data(db, k_ind, data_aug=True, debug=False):

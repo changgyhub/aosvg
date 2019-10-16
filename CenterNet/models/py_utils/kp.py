@@ -160,14 +160,14 @@ class kp(nn.Module):
         ])
 
         ## keypoint heatmaps
-        self.tl_heats = nn.ModuleList([
+        self.tl_hms = nn.ModuleList([
             make_heat_layer(cnv_dim, curr_dim, out_dim) for _ in range(nstack)
         ])
-        self.br_heats = nn.ModuleList([
+        self.br_hms = nn.ModuleList([
             make_heat_layer(cnv_dim, curr_dim, out_dim) for _ in range(nstack)
         ])
 
-        self.ct_heats = nn.ModuleList([
+        self.ct_hms = nn.ModuleList([
             make_heat_layer(cnv_dim, curr_dim, out_dim) for _ in range(nstack)
         ])
 
@@ -179,10 +179,10 @@ class kp(nn.Module):
             make_tag_layer(cnv_dim, curr_dim, 1) for _ in range(nstack)
         ])
 
-        for tl_heat, br_heat, ct_heat in zip(self.tl_heats, self.br_heats, self.ct_heats):
-            tl_heat[-1].bias.data.fill_(-2.19)
-            br_heat[-1].bias.data.fill_(-2.19)
-            ct_heat[-1].bias.data.fill_(-2.19)
+        for tl_hm, br_hm, ct_hm in zip(self.tl_hms, self.br_hms, self.ct_hms):
+            tl_hm[-1].bias.data.fill_(-2.19)
+            br_hm[-1].bias.data.fill_(-2.19)
+            ct_hm[-1].bias.data.fill_(-2.19)
 
         self.inters = nn.ModuleList([
             make_inter_layer(curr_dim) for _ in range(nstack - 1)
@@ -227,8 +227,8 @@ class kp(nn.Module):
         layers = zip(
             self.kps,      self.cnvs,
             self.tl_cnvs,  self.br_cnvs, 
-            self.ct_cnvs,  self.tl_heats, 
-            self.br_heats, self.ct_heats,
+            self.ct_cnvs,  self.tl_hms, 
+            self.br_hms, self.ct_hms,
             self.tl_tags,  self.br_tags,
             self.tl_regrs, self.br_regrs,
             self.ct_regrs,
@@ -237,8 +237,8 @@ class kp(nn.Module):
         for ind, layer in enumerate(layers):
             kp_, cnv_          = layer[0:2]
             tl_cnv_,  br_cnv_  = layer[2:4]
-            ct_cnv_,  tl_heat_ = layer[4:6]
-            br_heat_, ct_heat_ = layer[6:8]
+            ct_cnv_,  tl_hm_ = layer[4:6]
+            br_hm_, ct_hm_ = layer[6:8]
             tl_tag_,  br_tag_  = layer[8:10]
             tl_regr_,  br_regr_ = layer[10:12]
             ct_regr_         = layer[12]
@@ -269,7 +269,7 @@ class kp(nn.Module):
             br_cnv = br_cnv_(cnv)
             ct_cnv = ct_cnv_(cnv)
 
-            tl_heat, br_heat, ct_heat = tl_heat_(tl_cnv), br_heat_(br_cnv), ct_heat_(ct_cnv)
+            tl_hm, br_hm, ct_hm = tl_hm_(tl_cnv), br_hm_(br_cnv), ct_hm_(ct_cnv)
             tl_tag, br_tag        = tl_tag_(tl_cnv),  br_tag_(br_cnv)
             tl_regr, br_regr, ct_regr = tl_regr_(tl_cnv), br_regr_(br_cnv), ct_regr_(ct_cnv)
 
@@ -279,7 +279,7 @@ class kp(nn.Module):
             br_regr = _tranpose_and_gather_feat(br_regr, br_inds)
             ct_regr = _tranpose_and_gather_feat(ct_regr, ct_inds)
 
-            outs += [tl_heat, br_heat, ct_heat, tl_tag, br_tag, tl_regr, br_regr, ct_regr]
+            outs += [tl_hm, br_hm, ct_hm, tl_tag, br_tag, tl_regr, br_regr, ct_regr]
 
             if ind < self.nstack - 1:
                 inter = self.inters_[ind](inter) + self.cnvs_[ind](cnv)
@@ -300,8 +300,8 @@ class kp(nn.Module):
         layers = zip(
             self.kps,      self.cnvs,
             self.tl_cnvs,  self.br_cnvs,
-            self.ct_cnvs,  self.tl_heats,
-            self.br_heats, self.ct_heats,
+            self.ct_cnvs,  self.tl_hms,
+            self.br_hms, self.ct_hms,
             self.tl_tags,  self.br_tags,
             self.tl_regrs, self.br_regrs,
             self.ct_regrs,
@@ -310,8 +310,8 @@ class kp(nn.Module):
         for ind, layer in enumerate(layers):
             kp_, cnv_          = layer[0:2]
             tl_cnv_,  br_cnv_  = layer[2:4]
-            ct_cnv_,  tl_heat_ = layer[4:6]
-            br_heat_, ct_heat_ = layer[6:8]
+            ct_cnv_,  tl_hm_ = layer[4:6]
+            br_hm_, ct_hm_ = layer[6:8]
             tl_tag_,  br_tag_  = layer[8:10]
             tl_regr_,  br_regr_ = layer[10:12]
             ct_regr_         = layer[12]
@@ -341,12 +341,12 @@ class kp(nn.Module):
                 br_cnv = br_cnv_(cnv)
                 ct_cnv = ct_cnv_(cnv)
 
-                tl_heat, br_heat, ct_heat = tl_heat_(tl_cnv), br_heat_(br_cnv), ct_heat_(ct_cnv)
+                tl_hm, br_hm, ct_hm = tl_hm_(tl_cnv), br_hm_(br_cnv), ct_hm_(ct_cnv)
                 tl_tag, br_tag        = tl_tag_(tl_cnv),  br_tag_(br_cnv)
                 tl_regr, br_regr, ct_regr = tl_regr_(tl_cnv), br_regr_(br_cnv), ct_regr_(ct_cnv)
 
-                outs += [tl_heat, br_heat, tl_tag, br_tag, tl_regr, br_regr,
-                         ct_heat, ct_regr]
+                outs += [tl_hm, br_hm, tl_tag, br_tag, tl_regr, br_regr,
+                         ct_hm, ct_regr]
 
             if ind < self.nstack - 1:
                 inter = self.inters_[ind](inter) + self.cnvs_[ind](cnv)
@@ -374,18 +374,18 @@ class AELoss(nn.Module):
     def forward(self, outs, targets):
         stride = 8
 
-        tl_heats = outs[0::stride]
-        br_heats = outs[1::stride]
-        ct_heats = outs[2::stride]
+        tl_hms = outs[0::stride]
+        br_hms = outs[1::stride]
+        ct_hms = outs[2::stride]
         tl_tags  = outs[3::stride]
         br_tags  = outs[4::stride]
         tl_regrs = outs[5::stride]
         br_regrs = outs[6::stride]
         ct_regrs = outs[7::stride]
 
-        gt_tl_heat = targets[0]
-        gt_br_heat = targets[1]
-        gt_ct_heat = targets[2]
+        gt_tl_hm = targets[0]
+        gt_br_hm = targets[1]
+        gt_ct_hm = targets[2]
         gt_mask    = targets[3]
         gt_tl_regr = targets[4]
         gt_br_regr = targets[5]
@@ -394,13 +394,13 @@ class AELoss(nn.Module):
         # focal loss
         focal_loss = 0
 
-        tl_heats = [_sigmoid(t) for t in tl_heats]
-        br_heats = [_sigmoid(b) for b in br_heats]
-        ct_heats = [_sigmoid(c) for c in ct_heats]
+        tl_hms = [_sigmoid(t) for t in tl_hms]
+        br_hms = [_sigmoid(b) for b in br_hms]
+        ct_hms = [_sigmoid(c) for c in ct_hms]
 
-        focal_loss += self.focal_loss(tl_heats, gt_tl_heat)
-        focal_loss += self.focal_loss(br_heats, gt_br_heat)
-        focal_loss += self.focal_loss(ct_heats, gt_ct_heat)
+        focal_loss += self.focal_loss(tl_hms, gt_tl_hm)
+        focal_loss += self.focal_loss(br_hms, gt_br_hm)
+        focal_loss += self.focal_loss(ct_hms, gt_ct_hm)
 
         # tag loss
         pull_loss = 0
@@ -420,5 +420,5 @@ class AELoss(nn.Module):
             regr_loss += self.regr_loss(ct_regr, gt_ct_regr, gt_mask)
         regr_loss = self.regr_weight * regr_loss
 
-        loss = (focal_loss + pull_loss + push_loss + regr_loss) / len(tl_heats)
-        return loss.unsqueeze(0), (focal_loss / len(tl_heats)).unsqueeze(0), (pull_loss / len(tl_heats)).unsqueeze(0), (push_loss / len(tl_heats)).unsqueeze(0), (regr_loss / len(tl_heats)).unsqueeze(0)
+        loss = (focal_loss + pull_loss + push_loss + regr_loss) / len(tl_hms)
+        return loss.unsqueeze(0), (focal_loss / len(tl_hms)).unsqueeze(0), (pull_loss / len(tl_hms)).unsqueeze(0), (push_loss / len(tl_hms)).unsqueeze(0), (regr_loss / len(tl_hms)).unsqueeze(0)

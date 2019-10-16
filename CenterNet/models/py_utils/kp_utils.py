@@ -74,23 +74,23 @@ def _topk(scores, K=20):
     return topk_scores, topk_inds, topk_clses, topk_ys, topk_xs
 
 def _decode(
-    tl_heat, br_heat, tl_tag, br_tag, tl_regr, br_regr, ct_heat, ct_regr, 
+    tl_hm, br_hm, tl_tag, br_tag, tl_regr, br_regr, ct_hm, ct_regr, 
     K=100, kernel=1, ae_threshold=1, num_dets=1000
 ):
-    batch, cat, height, width = tl_heat.size()
+    batch, cat, height, width = tl_hm.size()
 
-    tl_heat = torch.sigmoid(tl_heat)
-    br_heat = torch.sigmoid(br_heat)
-    ct_heat = torch.sigmoid(ct_heat)
+    tl_hm = torch.sigmoid(tl_hm)
+    br_hm = torch.sigmoid(br_hm)
+    ct_hm = torch.sigmoid(ct_hm)
 
     # perform nms on heatmaps
-    tl_heat = _nms(tl_heat, kernel=kernel)
-    br_heat = _nms(br_heat, kernel=kernel)
-    ct_heat = _nms(ct_heat, kernel=kernel)
+    tl_hm = _nms(tl_hm, kernel=kernel)
+    br_hm = _nms(br_hm, kernel=kernel)
+    ct_hm = _nms(ct_hm, kernel=kernel)
 
-    tl_scores, tl_inds, tl_clses, tl_ys, tl_xs = _topk(tl_heat, K=K)
-    br_scores, br_inds, br_clses, br_ys, br_xs = _topk(br_heat, K=K)
-    ct_scores, ct_inds, ct_clses, ct_ys, ct_xs = _topk(ct_heat, K=K)
+    tl_scores, tl_inds, tl_clses, tl_ys, tl_xs = _topk(tl_hm, K=K)
+    br_scores, br_inds, br_clses, br_ys, br_xs = _topk(br_hm, K=K)
+    ct_scores, ct_inds, ct_clses, ct_ys, ct_xs = _topk(ct_hm, K=K)
 
     tl_ys = tl_ys.view(batch, K, 1).expand(batch, K, K)
     tl_xs = tl_xs.view(batch, K, 1).expand(batch, K, K)
