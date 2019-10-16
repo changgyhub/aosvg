@@ -1,6 +1,7 @@
 import os
 import re
 import torch
+import numpy as np
 
 from pytorch_pretrained_bert.tokenization import BertTokenizer
 from pytorch_pretrained_bert.modeling import BertModel
