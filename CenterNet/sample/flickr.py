@@ -63,10 +63,14 @@ def kp_detection(db, k_ind, data_aug, debug):
     gaussian_iou  = db.configs["gaussian_iou"]
     gaussian_rad  = db.configs["gaussian_radius"]
 
+    seq_length  = db.configs["max_query_len"]
+
     max_tag_len = 128
 
     # allocating memory
     images      = np.zeros((batch_size, 3, input_size[0], input_size[1]), dtype=np.float32)
+    word_ids    = np.zeros((batch_size, seq_length), dtype=np.int)
+    word_masks  = np.zeros((batch_size, seq_length), dtype=np.int)
     tl_heatmaps = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
     br_heatmaps = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
     ct_heatmaps = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
@@ -87,12 +91,10 @@ def kp_detection(db, k_ind, data_aug, debug):
         db_ind = db.db_inds[k_ind]
         k_ind  = (k_ind + 1) % db_size
 
-        # reading image
-        image_file = db.image_file(db_ind)
-        image      = cv2.imread(image_file)
-
-        # reading detections
-        detections = db.detections(db_ind)
+        # reading inputs
+        image, word_id, word_mask, detections = db.detections(db_ind)
+        word_ids[b_ind] = word_id
+        word_masks[b_ind] = word_mask
 
         # cropping an image randomly
         if not debug and rand_crop:
@@ -179,6 +181,8 @@ def kp_detection(db, k_ind, data_aug, debug):
         tag_masks[b_ind, :tag_len] = 1
 
     images      = torch.from_numpy(images)
+    word_ids    = torch.from_numpy(word_ids)
+    word_masks  = torch.from_numpy(word_masks)
     tl_heatmaps = torch.from_numpy(tl_heatmaps)
     br_heatmaps = torch.from_numpy(br_heatmaps)
     ct_heatmaps = torch.from_numpy(ct_heatmaps)
@@ -191,7 +195,7 @@ def kp_detection(db, k_ind, data_aug, debug):
     tag_masks   = torch.from_numpy(tag_masks)
 
     return {
-        "xs": [images, tl_tags, br_tags, ct_tags],
+        "xs": [images, word_ids, word_masks, tl_tags, br_tags, ct_tags],
         "ys": [tl_heatmaps, br_heatmaps, ct_heatmaps, tag_masks, tl_regrs, br_regrs, ct_regrs]
     }, k_ind
 

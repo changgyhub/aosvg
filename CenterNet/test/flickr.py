@@ -15,7 +15,7 @@ from config import system_configs
 from utils import crop_image, normalize_
 from external.nms import soft_nms, soft_nms_merge
 
-colours = np.random.rand(80,3)
+bbox_color = np.random.rand(3)
 
 def _rescale_dets(detections, ratios, borders, sizes):
     xs, ys = detections[..., 0:4:2], detections[..., 1:4:2]
@@ -50,8 +50,8 @@ def save_image(data, fn):
     plt.savefig(fn, dpi = height)
     plt.close()
 
-def kp_decode(nnet, images, K, ae_threshold=0.5, kernel=3):
-    detections, center = nnet.test([images], ae_threshold=ae_threshold, K=K, kernel=kernel)
+def kp_decode(nnet, inputs,  K, ae_threshold=0.5, kernel=3):
+    detections, center = nnet.test(inputs, ae_threshold=ae_threshold, K=K, kernel=kernel)
     detections = detections.data.cpu().numpy()
     center = center.data.cpu().numpy()
     return detections, center
@@ -61,11 +61,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
     if not os.path.exists(debug_dir):
         os.makedirs(debug_dir)
 
-    if db.split != "trainval":
-        db_inds = db.db_inds[:100] if debug else db.db_inds
-    else:
-        db_inds = db.db_inds[:100] if debug else db.db_inds[:5000]
-    num_images = db_inds.size
+    db_inds = db.db_inds[:100] if debug else db.db_inds
 
     K             = db.configs["top_k"]
     ae_threshold  = db.configs["ae_threshold"]
@@ -74,7 +70,6 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
     scales        = db.configs["test_scales"]
     weight_exp    = db.configs["weight_exp"]
     merge_bbox    = db.configs["merge_bbox"]
-    categories    = db.configs["categories"]
     nms_threshold = db.configs["nms_threshold"]
     max_per_image = db.configs["max_per_image"]
     nms_algorithm = {
@@ -83,13 +78,16 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
         "exp_soft_nms": 2
     }[db.configs["nms_algorithm"]]
 
-    top_bboxes = {}
-    for ind in tqdm(range(0, num_images), ncols=80, desc="locating kps"):
-        db_ind = db_inds[ind]
+    seq_length  = db.configs["max_query_len"]
 
-        image_id   = db.image_ids(db_ind)
-        image_file = db.image_file(db_ind)
-        image      = cv2.imread(image_file)
+    top_bboxes = {}
+    best_bboxes = {}
+    for ind in tqdm(range(db_inds.size), ncols=80, desc="locating kps"):
+
+        db_ind = db_inds[ind]
+        image_file = db.images[db_ind][0]
+
+        image, word_id, word_mask, _ = db.detections(db_ind)
 
         height, width = image.shape[0:2]
 
@@ -104,10 +102,12 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             inp_height = new_height | 127
             inp_width  = new_width  | 127
 
-            images  = np.zeros((1, 3, inp_height, inp_width), dtype=np.float32)
-            ratios  = np.zeros((1, 2), dtype=np.float32)
-            borders = np.zeros((1, 4), dtype=np.float32)
-            sizes   = np.zeros((1, 2), dtype=np.float32)
+            images      = np.zeros((1, 3, inp_height, inp_width), dtype=np.float32)
+            word_ids    = np.zeros((1, seq_length), dtype=np.int)
+            word_masks  = np.zeros((1, seq_length), dtype=np.int)
+            ratios      = np.zeros((1, 2), dtype=np.float32)
+            borders     = np.zeros((1, 4), dtype=np.float32)
+            sizes       = np.zeros((1, 2), dtype=np.float32)
 
             out_height, out_width = (inp_height + 1) // 4, (inp_width + 1) // 4
             height_ratio = out_height / inp_height
@@ -126,7 +126,9 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
 
             images = np.concatenate((images, images[:, :, :, ::-1]), axis=0)
             images = torch.from_numpy(images)
-            dets, center = decode_func(nnet, images, K, ae_threshold=ae_threshold, kernel=nms_kernel)
+            word_ids = torch.from_numpy(word_ids)
+            word_masks = torch.from_numpy(word_masks)
+            dets, center = decode_func(nnet, [images, word_ids, word_masks], K, ae_threshold=ae_threshold, kernel=nms_kernel)
             dets   = dets.reshape(2, -1, 8)
             center = center.reshape(2, -1, 4)
             dets[1, :, [0, 2]] = out_width - dets[1, :, [2, 0]]
@@ -219,61 +221,29 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
         detections = np.concatenate([l_detections,s_detections],axis = 0)
         detections = detections[np.argsort(-detections[:,4])] 
         classes   = detections[..., -1]
-                
-        #for i in range(detections.shape[0]):
-        #   box_width = detections[i,2]-detections[i,0]
-        #   box_height = detections[i,3]-detections[i,1]
-        #   if box_width*box_height<=22500 and detections[i,4]!=-1:
-        #     left_x = (2*detections[i,0]+1*detections[i,2])/3
-        #     right_x = (1*detections[i,0]+2*detections[i,2])/3
-        #     top_y = (2*detections[i,1]+1*detections[i,3])/3
-        #     bottom_y = (1*detections[i,1]+2*detections[i,3])/3
-        #     temp_score = copy.copy(detections[i,4])
-        #     detections[i,4] = -1
-        #     for j in range(center_points.shape[0]):
-        #        if (classes[i] == center_points[j,2])and \
-        #           (center_points[j,0]>left_x and center_points[j,0]< right_x) and \
-        #           ((center_points[j,1]>top_y and center_points[j,1]< bottom_y)):
-        #           detections[i,4] = (temp_score*2 + center_points[j,3])/3
-        #           break
-        #   elif box_width*box_height > 22500 and detections[i,4]!=-1:
-        #     left_x = (3*detections[i,0]+2*detections[i,2])/5
-        #     right_x = (2*detections[i,0]+3*detections[i,2])/5
-        #     top_y = (3*detections[i,1]+2*detections[i,3])/5
-        #     bottom_y = (2*detections[i,1]+3*detections[i,3])/5
-        #     temp_score = copy.copy(detections[i,4])
-        #     detections[i,4] = -1
-        #     for j in range(center_points.shape[0]):
-        #        if (classes[i] == center_points[j,2])and \
-        #           (center_points[j,0]>left_x and center_points[j,0]< right_x) and \
-        #           ((center_points[j,1]>top_y and center_points[j,1]< bottom_y)):
-        #           detections[i,4] = (temp_score*2 + center_points[j,3])/3
-        #           break
+
         # reject detections with negative scores
         keep_inds  = (detections[:, 4] > -1)
         detections = detections[keep_inds]
         classes    = classes[keep_inds]
 
-        top_bboxes[image_id] = {}
-        for j in range(categories):
-            keep_inds = (classes == j)
-            top_bboxes[image_id][j + 1] = detections[keep_inds][:, 0:7].astype(np.float32)
-            if merge_bbox:
-                soft_nms_merge(top_bboxes[image_id][j + 1], Nt=nms_threshold, method=nms_algorithm, weight_exp=weight_exp)
-            else:
-                soft_nms(top_bboxes[image_id][j + 1], Nt=nms_threshold, method=nms_algorithm)
-            top_bboxes[image_id][j + 1] = top_bboxes[image_id][j + 1][:, 0:5]
+        top_bboxes[db_ind] = {}
 
-        scores = np.hstack([
-            top_bboxes[image_id][j][:, -1] 
-            for j in range(1, categories + 1)
-        ])
+        top_bboxes[db_ind] = detections[:, 0:7].astype(np.float32)
+        if merge_bbox:
+            soft_nms_merge(top_bboxes[db_ind], Nt=nms_threshold, method=nms_algorithm, weight_exp=weight_exp)
+        else:
+            soft_nms(top_bboxes[db_ind], Nt=nms_threshold, method=nms_algorithm)
+        top_bboxes[db_ind] = top_bboxes[db_ind][:, 0:5]
+
+        scores = top_bboxes[db_ind][:, -1]
+        best_bboxes[db_ind] = top_bboxes[db_ind][np.argmax(scores)]
+
         if len(scores) > max_per_image:
             kth    = len(scores) - max_per_image
             thresh = np.partition(scores, kth)[kth]
-            for j in range(1, categories + 1):
-                keep_inds = (top_bboxes[image_id][j][:, -1] >= thresh)
-                top_bboxes[image_id][j] = top_bboxes[image_id][j][keep_inds]
+            keep_inds = (top_bboxes[db_ind][:, -1] >= thresh)
+            top_bboxes[db_ind] = top_bboxes[db_ind][keep_inds]
 
         if debug:
             image_file = db.image_file(db_ind)
@@ -284,37 +254,29 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             plt.axis('off')
             fig.axes.get_xaxis().set_visible(False)
             fig.axes.get_yaxis().set_visible(False)
-            #bboxes = {}
-            for j in range(1, categories + 1):
-                keep_inds = (top_bboxes[image_id][j][:, -1] >= 0.4)
-                cat_name  = db.class_name(j)
-                for bbox in top_bboxes[image_id][j][keep_inds]:
-                  bbox  = bbox[0:4].astype(np.int32)
-                  xmin     = bbox[0]
-                  ymin     = bbox[1]
-                  xmax     = bbox[2]
-                  ymax     = bbox[3]
-                  #if (xmax - xmin) * (ymax - ymin) > 5184:
-                  ax.add_patch(plt.Rectangle((xmin, ymin),xmax - xmin, ymax - ymin, fill=False, edgecolor= colours[j-1], 
-                               linewidth=4.0))
-                  ax.text(xmin+1, ymin-3, '{:s}'.format(cat_name), bbox=dict(facecolor= colours[j-1], ec='black', lw=2,alpha=0.5),
-                          fontsize=15, color='white', weight='bold')
 
-            debug_file1 = os.path.join(debug_dir, "{}.pdf".format(db_ind))
+            keep_inds = (top_bboxes[db_ind][:, -1] >= 0.4)
+            for bbox in top_bboxes[db_ind][keep_inds]:
+                bbox  = bbox[0:4].astype(np.int32)
+                xmin     = bbox[0]
+                ymin     = bbox[1]
+                xmax     = bbox[2]
+                ymax     = bbox[3]
+                ax.add_patch(plt.Rectangle((xmin, ymin),xmax - xmin, ymax - ymin, fill=False, edgecolor=bbox_color, linewidth=4.0))
+                ax.text(xmin+1, ymin-3, 'object', bbox=dict(facecolor=bbox_color, ec='black', lw=2,alpha=0.5), fontsize=15, color='white', weight='bold')
+
+            # debug_file1 = os.path.join(debug_dir, "{}.pdf".format(db_ind))
             debug_file2 = os.path.join(debug_dir, "{}.jpg".format(db_ind))
-            plt.savefig(debug_file1)
+            # plt.savefig(debug_file1)
             plt.savefig(debug_file2)
             plt.close()
-            #cv2.imwrite(debug_file, image, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
 
     result_json = os.path.join(result_dir, "results.json")
-    detections  = db.convert_to_coco(top_bboxes)
+    detections  = db.convert_to_json(top_bboxes)
     with open(result_json, "w") as f:
         json.dump(detections, f)
 
-    cls_ids   = list(range(1, categories + 1))
-    image_ids = [db.image_ids(ind) for ind in db_inds]
-    db.evaluate(result_json, cls_ids, image_ids)
+    db.evaluate(best_bboxes)
     return 0
 
 def testing(db, nnet, result_dir, debug=False):

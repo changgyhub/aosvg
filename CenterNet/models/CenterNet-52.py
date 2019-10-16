@@ -4,6 +4,10 @@ import torch.nn as nn
 from .py_utils import kp, AELoss, _neg_loss, convolution, residual
 from .py_utils import TopPool, BottomPool, LeftPool, RightPool
 
+from pytorch_pretrained_bert.tokenization import BertTokenizer
+from pytorch_pretrained_bert.modeling import BertModel
+
+
 class pool(nn.Module):
     def __init__(self, dim, pool1, pool2):
         super(pool, self).__init__()
@@ -129,8 +133,9 @@ class model(kp):
         n       = 5
         dims    = [256, 256, 384, 384, 384, 512]
         modules = [2, 2, 2, 2, 2, 4]
-        out_dim = 80
+        out_dim = 1
 
+        ## Visual model
         super(model, self).__init__(
             db, n, 1, dims, modules, out_dim,
             make_tl_layer=make_tl_layer,
@@ -140,5 +145,14 @@ class model(kp):
             make_hg_layer=make_hg_layer,
             kp_layer=residual, cnv_dim=256
         )
+
+        if self.bert_model == 'bert-base-uncased':
+            self.textdim = 768
+        else:
+            self.textdim = 1024
+
+        ## Text model
+        self.textmodel = BertModel.from_pretrained(self.bert_model)
+
 
 loss = AELoss(pull_weight=1e-1, push_weight=1e-1, focal_loss=_neg_loss)

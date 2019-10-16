@@ -1,13 +1,15 @@
 {
     "system": {
-        "dataset": "MSCOCO",
-        "batch_size": 48,
+        "dataset": "FLICKR",
+        "batch_size": 4,
         "sampling_function": "kp_detection",
 
-        "train_split": "trainval",
-        "val_split": "minival",
+        "train_split": "train",
+        "val_split": "val",
+        "test_split":"test",
 
         "learning_rate": 0.00025,
+        
         "decay_rate": 10,
 
         "val_iter": 500,
@@ -19,14 +21,12 @@
         "stepsize": 450000,
         "snapshot": 5000,
 
-        "chunk_sizes": [6,6,6,6,6,6,6,6],
-
-        "data_dir": "../data"
+        "chunk_sizes": [4]
     },
     
     "db": {
         "rand_scale_min": 0.6,
-        "rand_scale_max": 1.4,
+        "rand_scale_max": 1.2,
         "rand_scale_step": 0.1,
         "rand_scales": null,
 
@@ -42,11 +42,15 @@
         "test_scales": [1],
 
         "top_k": 70,
-        "categories": 80,
+        "categories": 1,
         "kp_categories": 1,
         "ae_threshold": 0.5,
         "nms_threshold": 0.5,
 
-        "max_per_image": 100
+        "max_per_image": 100,
+
+        "coordmap": true,
+        "bert_model": "bert-base-uncased",
+        "max_query_len": 128
     }
 }

@@ -1,5 +1,5 @@
-from db.coco import MSCOCO 
+from db.flickr import FLICKR 
 
 datasets = {
-    "MSCOCO": MSCOCO
+    "FLICKR": FLICKR
 }

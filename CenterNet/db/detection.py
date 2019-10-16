@@ -38,6 +38,10 @@ class DETECTION(BASE):
         self._configs["rand_samples"]    = False
         self._configs["special_crop"]    = False
 
+        self._configs["coordmap"]        = True
+        self._configs["bert_model"]      = "bert-base-uncased"
+        self._configs["max_query_len"]   = 128
+
         self._configs["test_scales"]     = [1]
 
         self._train_cfg["rcnn"] = dict(

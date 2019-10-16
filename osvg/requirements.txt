@@ -1,0 +1,4 @@
+pytorch-pretrained-bert
+scipy
+matplotlib
+opencv-python

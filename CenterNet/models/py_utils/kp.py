@@ -14,6 +14,26 @@ from .kp_utils import make_tl_layer, make_br_layer, make_kp_layer, make_ct_layer
 from .kp_utils import make_pool_layer, make_unpool_layer
 from .kp_utils import make_merge_layer, make_inter_layer, make_cnv_layer
 
+
+def generate_coord(batch, height, width):
+    # coord = Variable(torch.zeros(batch,8,height,width).cuda())
+    xv, yv = torch.meshgrid([torch.arange(0,height), torch.arange(0,width)])
+    xv_min = (xv.float()*2 - width)/width
+    yv_min = (yv.float()*2 - height)/height
+    xv_max = ((xv+1).float()*2 - width)/width
+    yv_max = ((yv+1).float()*2 - height)/height
+    xv_ctr = (xv_min+xv_max)/2
+    yv_ctr = (yv_min+yv_max)/2
+    hmap = torch.ones(height,width)*(1./height)
+    wmap = torch.ones(height,width)*(1./width)
+    coord = torch.autograd.Variable(torch.cat([xv_min.unsqueeze(0), yv_min.unsqueeze(0),\
+        xv_max.unsqueeze(0), yv_max.unsqueeze(0),\
+        xv_ctr.unsqueeze(0), yv_ctr.unsqueeze(0),\
+        hmap.unsqueeze(0), wmap.unsqueeze(0)], dim=0).cuda())
+    coord = coord.unsqueeze(0).repeat(batch,1,1,1)
+    return coord
+
+
 class kp_module(nn.Module):
     def __init__(
         self, n, dims, modules, layer=residual,
@@ -119,6 +139,14 @@ class kp(nn.Module):
             make_cnv_layer(curr_dim, cnv_dim) for _ in range(nstack)
         ])
 
+        # ============================================
+        # Language Attention module
+        self.coordmap = self._db.configs["coordmap"]
+        self.bert_model = self._db.configs["bert_model"]
+        self.textmodel = nn.Identity()
+        self.mapping_lang = nn.Identity()
+        # ============================================
+
         self.tl_cnvs = nn.ModuleList([
             make_tl_layer(cnv_dim) for _ in range(nstack)
         ])
@@ -186,9 +214,11 @@ class kp(nn.Module):
 
     def _train(self, *xs):
         image      = xs[0]
-        tl_inds    = xs[1]
-        br_inds    = xs[2]
-        ct_inds    = xs[3]
+        word_id    = xs[1]
+        word_mask  = xs[2]
+        tl_inds    = xs[3]
+        br_inds    = xs[4]
+        ct_inds    = xs[5]
 
         inter      = self.pre(image)
         outs       = []
@@ -216,6 +246,21 @@ class kp(nn.Module):
             kp  = kp_(inter)
             cnv = cnv_(kp)
 
+            # ============================================
+            # Language Attention module
+            all_encoder_layers, _ = self.textmodel(word_id, token_type_ids=None, attention_mask=word_mask)
+            raw_flang = (all_encoder_layers[-1][:,0,:] + all_encoder_layers[-2][:,0,:] + all_encoder_layers[-3][:,0,:] + all_encoder_layers[-4][:,0,:])/4
+            raw_flang = raw_flang.detach()
+            flang = self.mapping_lang(raw_flang)
+            flang = F.normalize(flang, p=2, dim=1)
+            flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
+            if self.coordmap:
+                coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
+                cnv = torch.cat([cnv, flang_tile, coord], dim=1)
+            else:
+                cnv = torch.cat([cnv, flang_tile], dim=1)
+            # ============================================     
+
             tl_cnv = tl_cnv_(cnv)
             br_cnv = br_cnv_(cnv)
             ct_cnv = ct_cnv_(cnv)
@@ -240,7 +285,9 @@ class kp(nn.Module):
         return outs
 
     def _test(self, *xs, **kwargs):
-        image = xs[0]
+        image      = xs[0]
+        word_id    = xs[1]
+        word_mask  = xs[2]
 
         inter = self.pre(image)
 
@@ -267,6 +314,21 @@ class kp(nn.Module):
             kp  = kp_(inter)
             cnv = cnv_(kp)
 
+            # ============================================
+            # Language Attention module
+            all_encoder_layers, _ = self.textmodel(word_id, token_type_ids=None, attention_mask=word_mask)
+            raw_flang = (all_encoder_layers[-1][:,0,:] + all_encoder_layers[-2][:,0,:] + all_encoder_layers[-3][:,0,:] + all_encoder_layers[-4][:,0,:])/4
+            raw_flang = raw_flang.detach()
+            flang = self.mapping_lang(raw_flang)
+            flang = F.normalize(flang, p=2, dim=1)
+            flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
+            if self.coordmap:
+                coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
+                cnv = torch.cat([cnv, flang_tile, coord], dim=1)
+            else:
+                cnv = torch.cat([cnv, flang_tile], dim=1)
+            # ============================================     
+
             if ind == self.nstack - 1:
                 tl_cnv = tl_cnv_(cnv)
                 br_cnv = br_cnv_(cnv)
@@ -287,7 +349,7 @@ class kp(nn.Module):
         return self._decode(*outs[-8:], **kwargs)
 
     def forward(self, *xs, **kwargs):
-        if len(xs) > 1:
+        if len(xs) > 3:
             return self._train(*xs, **kwargs)
         return self._test(*xs, **kwargs)
 
