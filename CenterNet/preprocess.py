@@ -134,6 +134,9 @@ if __name__ == "__main__":
                 word_id = features[0].input_ids
                 word_mask = features[0].input_mask
 
+                word_id = torch.from_numpy(word_id)
+                word_mask = torch.from_numpy(word_mask)
+
                 all_encoder_layers, _ = textmodel(word_id, token_type_ids=None, attention_mask=word_mask)
                 raw_flang = (all_encoder_layers[-1][:,0,:] + all_encoder_layers[-2][:,0,:] + all_encoder_layers[-3][:,0,:] + all_encoder_layers[-4][:,0,:])/4
                 print(raw_flang)
