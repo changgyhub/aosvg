@@ -244,7 +244,10 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
         top_bboxes[db_ind] = top_bboxes[db_ind][:, 0:5]
 
         scores = top_bboxes[db_ind][:, -1]
-        best_bboxes[db_ind] = top_bboxes[db_ind][np.argmax(scores)]
+        if scores and len(scores) > 0:
+            best_bboxes[db_ind] = top_bboxes[db_ind][np.argmax(scores)]
+        else:
+            best_bboxes[db_ind] = None
 
         if len(scores) > max_per_image:
             kth    = len(scores) - max_per_image

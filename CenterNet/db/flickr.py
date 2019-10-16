@@ -250,11 +250,12 @@ class FLICKR(DETECTION):
     def evaluate(self, best_bboxes):
         acc = 0.0
         for db_ind in best_bboxes:
-            gt_bbox = self.images[db_ind][1]
-            pred_bbox = best_bboxes[db_ind][:4]
-            iou = bbox_iou(pred_bbox, gt_bbox, x1y1x2y2=True)
-            if iou > 0.5:
-                acc += 1.0
+            if best_bboxes[db_ind]:
+                gt_bbox = self.images[db_ind][1]
+                pred_bbox = best_bboxes[db_ind][:4]
+                iou = bbox_iou(pred_bbox, gt_bbox, x1y1x2y2=True)
+                if iou > 0.5:
+                    acc += 1.0
         acc = acc / len(self._db_inds)
         print("BBox accuracy = {:f}%".format(100 * acc))
         return acc
