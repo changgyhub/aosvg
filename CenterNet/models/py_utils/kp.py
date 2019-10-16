@@ -116,6 +116,8 @@ class kp(nn.Module):
         self.input_size         = self._db.configs["input_size"][0]
         self.output_size        = self._db.configs["output_sizes"][0][0]
 
+        self.fix_visual_pretrain = self._db.configs["fix_visual_pretrain"]
+
         curr_dim = dims[0]
 
         self.pre = nn.Sequential(
@@ -247,6 +249,8 @@ class kp(nn.Module):
             # # We fix the feature extracter with pre-trained model.
             # with torch.no_grad():
             kp  = kp_(inter)
+            if self.fix_visual_pretrain:
+                kp = kp.detach()
             cnv = cnv_(kp)
 
             # ============================================

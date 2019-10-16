@@ -18,7 +18,7 @@
         "prefetch_size": 6,
         
         "display": 100,
-        "val_iter": 1000,
+        "val_iter": 1,
         "max_iter": 480000,
         "stepsize": 450000,
         "snapshot": 5000,
@@ -53,6 +53,8 @@
 
         "coordmap": true,
         "bert_model": "bert-base-uncased",
-        "max_query_len": 128
+        "max_query_len": 128,
+
+        "fix_visual_pretrain": true
     }
 }
