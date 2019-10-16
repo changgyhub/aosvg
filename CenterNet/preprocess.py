@@ -126,6 +126,7 @@ if __name__ == "__main__":
             new_images = []
             for i in range(len(images)):
                 image_file, bbox, phrase = images[i]
+                print(type(bbox))
 
                 phrase = phrase.lower()
 
@@ -139,8 +140,7 @@ if __name__ == "__main__":
                 word_mask = torch.from_numpy(word_mask)
 
                 all_encoder_layers, _ = textmodel(word_id, token_type_ids=None, attention_mask=word_mask)
-                raw_flang = (all_encoder_layers[-1][:,0,:] + all_encoder_layers[-2][:,0,:] + all_encoder_layers[-3][:,0,:] + all_encoder_layers[-4][:,0,:])/4
-                print(raw_flang)
-                print(raw_flang.shape)
-                input()
+                bert_feature = (all_encoder_layers[-1][:,0,:] + all_encoder_layers[-2][:,0,:] + all_encoder_layers[-3][:,0,:] + all_encoder_layers[-4][:,0,:])/4
+                
+                bert_feature = bert_feature.data.cpu().numpy().flatten()
             
