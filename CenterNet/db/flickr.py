@@ -207,6 +207,7 @@ class FLICKR(DETECTION):
         ## box format: x1y1x2y2
         bbox = np.array(bbox, dtype=int)
         image_path = os.path.join(self._image_dir, image_file)
+        print("======", image_path)
         image = cv2.imread(image_path)
         ## duplicate channel if gray image
         if image.shape[-1] > 1:
