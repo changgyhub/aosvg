@@ -244,7 +244,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
         top_bboxes[db_ind] = top_bboxes[db_ind][:, 0:5]
 
         scores = top_bboxes[db_ind][:, -1]
-        if scores and len(scores) > 0:
+        if scores is not None and len(scores) > 0:
             best_bboxes[db_ind] = top_bboxes[db_ind][np.argmax(scores)]
         else:
             best_bboxes[db_ind] = None
