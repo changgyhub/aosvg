@@ -249,14 +249,23 @@ class FLICKR(DETECTION):
         return detections
 
     def evaluate(self, best_bboxes):
-        acc = 0.0
+        ious = []
         for db_ind in best_bboxes:
+            iou = 0
             if best_bboxes[db_ind] is not None:
                 gt_bbox = self.images[db_ind][1]
                 pred_bbox = best_bboxes[db_ind][:4]
                 iou = bbox_iou(pred_bbox, gt_bbox)
-                if iou > 0.5:
-                    acc += 1.0
-        acc = acc / len(self._db_inds)
-        print("BBox accuracy = {:f}%".format(100 * acc))
-        return acc
+            ious.append(iou)
+        ious = np.array(ious)
+        print("Evaluation results:")
+        print("BBox over 10% = {:f}%".format(100 * sum(ious > 0.1) / len(ious)))
+        print("BBox over 20% = {:f}%".format(100 * sum(ious > 0.2) / len(ious)))
+        print("BBox over 30% = {:f}%".format(100 * sum(ious > 0.3) / len(ious)))
+        print("BBox over 40% = {:f}%".format(100 * sum(ious > 0.4) / len(ious)))
+        print("BBox over 50% = {:f}%".format(100 * sum(ious > 0.5) / len(ious)))
+        print("BBox over 60% = {:f}%".format(100 * sum(ious > 0.6) / len(ious)))
+        print("BBox over 70% = {:f}%".format(100 * sum(ious > 0.7) / len(ious)))
+        print("BBox over 80% = {:f}%".format(100 * sum(ious > 0.8) / len(ious)))
+        print("BBox over 90% = {:f}%".format(100 * sum(ious > 0.9) / len(ious)))
+        return sum(ious > 0.5) / len(ious)
