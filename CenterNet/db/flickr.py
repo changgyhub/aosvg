@@ -236,14 +236,17 @@ class FLICKR(DETECTION):
         for db_ind in all_bboxes:
             for bbox in all_bboxes[db_ind]:
                 score = bbox[4]
-                bbox  = list(map(self._to_float, bbox[0:4]))
+                gt_bbox = list(map(self._to_float, self.images[db_ind][1]))
+                pred_bbox  = list(map(self._to_float, bbox[0:4]))
                 detection = {
                     "image_file": self.images[db_ind][0],
                     "phrase": self.images[db_ind][2],
-                    "gt_bbox": self.images[db_ind][1],
-                    "pred_bbox": bbox,
+                    "gt_bbox": gt_bbox,
+                    "pred_bbox": pred_bbox,
                     "score": float("{:.2f}".format(score))
                 }
+                if len(detections) == 0:
+                    print(detection)
                 detections.append(detection)
         return detections
 
