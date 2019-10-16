@@ -64,12 +64,14 @@ def kp_detection(db, k_ind, data_aug, debug):
     gaussian_rad  = db.configs["gaussian_radius"]
 
     seq_length  = db.configs["max_query_len"]
+    bert_model  = db.configs["bert_model"]
+    textdim = 768 if bert_model == 'bert-base-uncased' else 1024
 
     max_tag_len = 128
 
     # allocating memory
     images        = np.zeros((batch_size, 3, input_size[0], input_size[1]), dtype=np.float32)
-    bert_features = np.zeros((batch_size, seq_length), dtype=np.int)
+    bert_features = np.zeros((batch_size, textdim), dtype=np.float32)
     tl_hms = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
     br_hms = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
     ct_hms = np.zeros((batch_size, categories, output_size[0], output_size[1]), dtype=np.float32)
@@ -91,9 +93,8 @@ def kp_detection(db, k_ind, data_aug, debug):
         k_ind  = (k_ind + 1) % db_size
 
         # reading inputs
-        image, word_id, word_mask, detections = db.detections(db_ind)
-        word_ids[b_ind] = word_id
-        word_masks[b_ind] = word_mask
+        image, bert_feature, detections = db.detections(db_ind)
+        bert_features[b_ind] = bert_feature
 
         # cropping an image randomly
         if not debug and rand_crop:
@@ -179,22 +180,21 @@ def kp_detection(db, k_ind, data_aug, debug):
         tag_len = tag_lens[b_ind]
         tag_masks[b_ind, :tag_len] = 1
 
-    images      = torch.from_numpy(images)
-    word_ids    = torch.from_numpy(word_ids)
-    word_masks  = torch.from_numpy(word_masks)
-    tl_hms      = torch.from_numpy(tl_hms)
-    br_hms      = torch.from_numpy(br_hms)
-    ct_hms      = torch.from_numpy(ct_hms)
-    tl_regrs    = torch.from_numpy(tl_regrs)
-    br_regrs    = torch.from_numpy(br_regrs)
-    ct_regrs    = torch.from_numpy(ct_regrs)
-    tl_tags     = torch.from_numpy(tl_tags)
-    br_tags     = torch.from_numpy(br_tags)
-    ct_tags     = torch.from_numpy(ct_tags)
-    tag_masks   = torch.from_numpy(tag_masks)
+    images        = torch.from_numpy(images)
+    bert_features = torch.from_numpy(bert_features)
+    tl_hms        = torch.from_numpy(tl_hms)
+    br_hms        = torch.from_numpy(br_hms)
+    ct_hms        = torch.from_numpy(ct_hms)
+    tl_regrs      = torch.from_numpy(tl_regrs)
+    br_regrs      = torch.from_numpy(br_regrs)
+    ct_regrs      = torch.from_numpy(ct_regrs)
+    tl_tags       = torch.from_numpy(tl_tags)
+    br_tags       = torch.from_numpy(br_tags)
+    ct_tags       = torch.from_numpy(ct_tags)
+    tag_masks     = torch.from_numpy(tag_masks)
 
     return {
-        "xs": [images, word_ids, word_masks, tl_tags, br_tags, ct_tags],
+        "xs": [images, bert_features, tl_tags, br_tags, ct_tags],
         "ys": [tl_hms, br_hms, ct_hms, tag_masks, tl_regrs, br_regrs, ct_regrs]
     }, k_ind
 

@@ -148,7 +148,7 @@ class model(kp):
         ## Text model
         emb_size = 256
         dropout_ratio = 0.1
-        textdim = 768 if self.bert_model == 'bert-base-uncased' else 1024
+        textdim = 768 if db.configs["bert_model"] == 'bert-base-uncased' else 1024
         fusion_dim = 520
 
         self.mapping_lang = torch.nn.Sequential(

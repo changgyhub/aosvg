@@ -143,6 +143,5 @@ if __name__ == "__main__":
                 bert_feature = (all_encoder_layers[-1][:,0,:] + all_encoder_layers[-2][:,0,:] + all_encoder_layers[-3][:,0,:] + all_encoder_layers[-4][:,0,:])/4
                 
                 bert_feature = bert_feature.data.cpu().numpy().flatten()
-                print(type(bert_feature), type(bert_feature[0]))
                 new_images.append((image_file, bbox, phrase, bert_feature))
             torch.save(new_images, new_label_file)

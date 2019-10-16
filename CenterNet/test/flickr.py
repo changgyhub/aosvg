@@ -79,6 +79,8 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode, parti
     }[db.configs["nms_algorithm"]]
 
     seq_length  = db.configs["max_query_len"]
+    bert_model  = db.configs["bert_model"]
+    textdim = 768 if bert_model == 'bert-base-uncased' else 1024
 
     top_bboxes = {}
     best_bboxes = {}
@@ -87,7 +89,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode, parti
         db_ind = db_inds[ind]
         image_file = db.images[db_ind][0]
 
-        image, word_id, word_mask, _ = db.detections(db_ind)
+        image, bert_feature, _ = db.detections(db_ind)
 
         height, width = image.shape[0:2]
 
@@ -102,15 +104,13 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode, parti
             inp_height = new_height | 127
             inp_width  = new_width  | 127
 
-            images      = np.zeros((1, 3, inp_height, inp_width), dtype=np.float32)
-            word_ids    = np.zeros((1, seq_length), dtype=np.int)
-            word_masks  = np.zeros((1, seq_length), dtype=np.int)
-            ratios      = np.zeros((1, 2), dtype=np.float32)
-            borders     = np.zeros((1, 4), dtype=np.float32)
-            sizes       = np.zeros((1, 2), dtype=np.float32)
+            images           = np.zeros((1, 3, inp_height, inp_width), dtype=np.float32)
+            bert_features    = np.zeros((1, textdim), dtype=np.int)
+            ratios           = np.zeros((1, 2), dtype=np.float32)
+            borders          = np.zeros((1, 4), dtype=np.float32)
+            sizes            = np.zeros((1, 2), dtype=np.float32)
 
-            word_ids[0] = word_id
-            word_masks[0] = word_mask
+            bert_features[0] = bert_feature
 
             out_height, out_width = (inp_height + 1) // 4, (inp_width + 1) // 4
             height_ratio = out_height / inp_height
@@ -129,13 +129,11 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode, parti
 
             # Flip to perform detection twice
             images = np.concatenate((images, images[:, :, :, ::-1]), axis=0)
-            word_ids = np.concatenate((word_ids, word_ids), axis=0)
-            word_masks = np.concatenate((word_masks, word_masks), axis=0)
+            bert_features = np.concatenate((bert_features, bert_features), axis=0)
 
             images = torch.from_numpy(images)
-            word_ids = torch.from_numpy(word_ids)
-            word_masks = torch.from_numpy(word_masks)
-            dets, center = decode_func(nnet, [images, word_ids, word_masks], K, ae_threshold=ae_threshold, kernel=nms_kernel)
+            bert_features = torch.from_numpy(bert_features)
+            dets, center = decode_func(nnet, [images, bert_features], K, ae_threshold=ae_threshold, kernel=nms_kernel)
             dets   = dets.reshape(2, -1, 8)
             center = center.reshape(2, -1, 4)
             dets[1, :, [0, 2]] = out_width - dets[1, :, [2, 0]]
