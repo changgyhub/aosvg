@@ -137,7 +137,6 @@ def train(training_dbs, validation_db, start_iter=0):
         for iteration in tqdm(range(start_iter + 1, max_iteration + 1), file=save_stdout, ncols=80):
             training = pinned_training_queue.get(block=True)
             training_loss, focal_loss, pull_loss, push_loss, regr_loss = nnet.train(**training)
-            #training_loss, focal_loss, pull_loss, push_loss, regr_loss, cls_loss = nnet.train(**training)
 
             if display and iteration % display == 0:
                 print("training loss at iteration {}: {}".format(iteration, training_loss.item()))
@@ -145,19 +144,17 @@ def train(training_dbs, validation_db, start_iter=0):
                 print("pull loss at iteration {}:     {}".format(iteration, pull_loss.item())) 
                 print("push loss at iteration {}:     {}".format(iteration, push_loss.item()))
                 print("regr loss at iteration {}:     {}".format(iteration, regr_loss.item()))
-                #print("cls loss at iteration {}:      {}\n".format(iteration, cls_loss.item()))
 
             del training_loss, focal_loss, pull_loss, push_loss, regr_loss#, cls_loss
 
             if val_iter and validation_db.db_inds.size and iteration % val_iter == 0:
-                with torch.no_grad():
-                    nnet.eval_mode()
-                    validation = pinned_validation_queue.get(block=True)
-                    validation_loss = nnet.validate(**validation)
-                    print("validation loss at iteration {}: {}".format(iteration, validation_loss.item()))
-                    validation_file = "test.{}".format(validation_db.data)
-                    validating = importlib.import_module(validation_file).testing
-                    validating(validation_db, nnet, result_dir)
+                nnet.eval_mode()
+                validation = pinned_validation_queue.get(block=True)
+                validation_loss = nnet.validate(**validation)
+                print("validation loss at iteration {}: {}".format(iteration, validation_loss.item()))
+                validation_file = "test.{}".format(validation_db.data)
+                validating = importlib.import_module(validation_file).testing
+                validating(validation_db, nnet, result_dir)
                 nnet.train_mode()
 
             if iteration % snapshot == 0:

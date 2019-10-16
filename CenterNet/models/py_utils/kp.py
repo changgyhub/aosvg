@@ -218,6 +218,7 @@ class kp(nn.Module):
     def _train(self, *xs):
         image      = xs[0]
         word_id    = xs[1]
+        print(word_id.shape)
         word_mask  = xs[2]
         tl_inds    = xs[3]
         br_inds    = xs[4]
@@ -295,6 +296,7 @@ class kp(nn.Module):
     def _test(self, *xs, **kwargs):
         image      = xs[0]
         word_id    = xs[1]
+        print(word_id.shape)
         word_mask  = xs[2]
 
         inter = self.pre(image)
