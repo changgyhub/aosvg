@@ -56,12 +56,12 @@ def kp_decode(nnet, inputs,  K, ae_threshold=0.5, kernel=3):
     center = center.data.cpu().numpy()
     return detections, center
 
-def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
+def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode, partial=False):
     debug_dir = os.path.join(result_dir, "debug")
     if not os.path.exists(debug_dir):
         os.makedirs(debug_dir)
 
-    db_inds = db.db_inds[:100] if debug else db.db_inds
+    db_inds = db.db_inds[:100] if partial else db.db_inds
 
     K             = db.configs["top_k"]
     ae_threshold  = db.configs["ae_threshold"]

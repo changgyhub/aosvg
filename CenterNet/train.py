@@ -154,7 +154,7 @@ def train(training_dbs, validation_db, start_iter=0):
                 print("validation loss at iteration {}: {}".format(iteration, validation_loss.item()))
                 validation_file = "test.{}".format(validation_db.data)
                 validating = importlib.import_module(validation_file).testing
-                validating(validation_db, nnet, result_dir)
+                validating(validation_db, nnet, result_dir, partial=True)
                 nnet.train_mode()
 
             if iteration % snapshot == 0:
