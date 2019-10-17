@@ -149,5 +149,5 @@ if __name__ == "__main__":
                     print("bbox:", bbox)
                     print("phrase:", phrase)
                     print("bert_feature:", bert_feature[:5], "... total of size", len(bert_feature))
-                    break
+
             torch.save(new_images, new_label_file)
