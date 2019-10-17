@@ -36,6 +36,25 @@ cd <CenterNet dir>/external
 make
 ```
 
+## Prepare Data
+
+We temporally use data and model from "A Fast and Accurate One-Stage Approach to Visual Grounding".
+
+* Flickr30K Entities Dataset: place the data or the soft link of dataset folder under `data/flickr`. The formated Flickr data is availble at [[Gdrive]](https://drive.google.com/open?id=1A1iWUWgRg7wV5qwOP_QVujOO4B8U-UYB), [[One Drive]](https://uofr-my.sharepoint.com/:f:/g/personal/zyang39_ur_rochester_edu/Eqgejwkq-hZIjCkhrgWbdIkB_yi3K4uqQyRCwf9CSe_zpQ?e=dtu8qF). We only use the image folder. Please name it as `data/flickr/flickr30k_images`
+
+* Data index: download the generated index files and place them as the `data/flickr` folder. Availble at [[Gdrive]](https://drive.google.com/open?id=1cZI562MABLtAzM6YU4WmKPFFguuVr0lZ), [[One Drive]](https://uofr-my.sharepoint.com/:f:/g/personal/zyang39_ur_rochester_edu/Epw5WQ_mJ-tOlAbK5LxsnrsBElWwvNdU7aus0UIzWtwgKQ?e=XHQm7F). We only use `data/flickr/flickr_{train/val/test}.pth`.
+
+The final data folder should look like this
+
+```text
+- data/
+| - flickr/
+  | - flickr30k_images/
+  | - flickr_test.pth
+  | - flickr_train.pth
+  | - flickr_val.pth
+```
+
 ## Preprocessing
 
 Run the following command to preprocess phrases into bert feature vectors
