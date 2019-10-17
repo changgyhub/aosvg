@@ -17,11 +17,11 @@
         "opt_algo": "adam",
         "prefetch_size": 6,
         
-        "display": 250,
-        "val_iter": 2500,
-        "max_iter": 480000,
-        "stepsize": 450000,
-        "snapshot": 2500,
+        "display": 1,
+        "val_iter": 1,
+        "max_iter": 1,
+        "stepsize": 1,
+        "snapshot": 1,
 
         "chunk_sizes": [4]
     },

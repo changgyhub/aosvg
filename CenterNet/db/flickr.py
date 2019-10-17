@@ -45,14 +45,10 @@ class FLICKR(DETECTION):
         cache_dir  = system_configs.cache_dir
 
         self._split = split
-        self._dataset = {
-            "train": "flickr_train",
-            "val": "flickr_val",
-            "test": "flickr_test"
-        }[self._split]
-        
+        self._dataset = self._split
+
         self._label_dir  = os.path.join(data_dir, "flickr")
-        self._label_file = os.path.join(self._label_dir, "{}_" + self._configs["bert_model"] + "-" + str(self._configs["max_query_len"]) + ".pth")
+        self._label_file = os.path.join(self._label_dir, "flickr-" + self._configs["bert_model"] + "-" + str(self._configs["max_query_len"]) + "_{}.pth")
         self._label_file = self._label_file.format(self._dataset)
 
         self._image_dir  = os.path.join(data_dir, "flickr", "flickr30k_images")
