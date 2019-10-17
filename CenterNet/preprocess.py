@@ -128,10 +128,8 @@ if __name__ == "__main__":
             for i in range(len(images)):
                 image_file, bbox, phrase = images[i]
 
-                phrase = phrase.lower()
-
                 ## encode phrase to bert input
-                examples = read_examples(phrase, i)
+                examples = read_examples(phrase.lower(), i)
                 features = convert_examples_to_features(examples=examples, seq_length=max_query_len, tokenizer=tokenizer)
                 word_id = np.array(features[0].input_ids, dtype=int).reshape((1, -1))
                 word_mask = np.array(features[0].input_mask, dtype=int).reshape((1, -1))
