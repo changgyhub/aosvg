@@ -105,7 +105,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode, parti
             inp_width  = new_width  | 127
 
             images           = np.zeros((1, 3, inp_height, inp_width), dtype=np.float32)
-            bert_features    = np.zeros((1, textdim), dtype=np.int)
+            bert_features    = np.zeros((1, textdim), dtype=np.float32)
             ratios           = np.zeros((1, 2), dtype=np.float32)
             borders          = np.zeros((1, 4), dtype=np.float32)
             sizes            = np.zeros((1, 2), dtype=np.float32)
