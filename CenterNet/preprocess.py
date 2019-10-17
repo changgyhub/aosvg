@@ -126,8 +126,6 @@ if __name__ == "__main__":
             images = torch.load(label_file)
             new_images = []
             for i in range(len(images)):
-                if (i % (len(images) // 1000)) == 0:
-                    print("Dataset {} {}/{}".format(dataset, i, len(images)))
                 image_file, bbox, phrase = images[i]
 
                 phrase = phrase.lower()
@@ -146,4 +144,11 @@ if __name__ == "__main__":
                 
                 bert_feature = bert_feature.data.cpu().numpy().flatten()
                 new_images.append((image_file, bbox, phrase, bert_feature))
+
+                if (i % (len(images) // 1000)) == 0:
+                    print("Dataset {} {}/{}".format(dataset, i, len(images)))
+                    print("image_file:", image_file)
+                    print("bbox:", bbox)
+                    print("phrase:", phrase)
+                    print("bert_feature:", bert_feature[:5], "... total of size", len(bert_feature))
             torch.save(new_images, new_label_file)
