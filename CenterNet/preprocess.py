@@ -126,9 +126,7 @@ if __name__ == "__main__":
             images = torch.load(label_file)
             new_images = []
             for i in range(len(images)):
-                print(len(images))
-                print(len(images)// 100)
-                if (i % (len(images) // 100)) == 0:
+                if (i % (len(images) // 1000)) == 0:
                     print("Dataset {} {}/{}".format(dataset, i, len(images)))
                 image_file, bbox, phrase = images[i]
 
