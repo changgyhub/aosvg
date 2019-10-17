@@ -1,7 +1,7 @@
 {
     "system": {
         "dataset": "FLICKR",
-        "batch_size": 4,
+        "batch_size": 8,
         "sampling_function": "kp_detection",
 
         "train_split": "train",
@@ -23,9 +23,9 @@
         "stepsize": 450000,
         "snapshot": 2500,
 
-        "chunk_sizes": [4],
+        "chunk_sizes": [4, 4],
 
-        "data_dir": "/scratch/changg/aosvg/data"
+        "data_dir": "data"
     },
     
     "db": {
