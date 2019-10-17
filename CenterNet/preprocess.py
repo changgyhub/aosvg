@@ -126,7 +126,9 @@ if __name__ == "__main__":
             images = torch.load(label_file)
             new_images = []
             for i in range(len(images)):
-                if (len(images) % i) == (len(images) // 100):
+                print(len(images))
+                print(len(images)// 100)
+                if (i % (len(images) // 100)) == 0:
                     print("Dataset {} {}/{}".format(dataset, i, len(images)))
                 image_file, bbox, phrase = images[i]
 
@@ -138,8 +140,8 @@ if __name__ == "__main__":
                 word_id = np.array(features[0].input_ids, dtype=int).reshape((1, -1))
                 word_mask = np.array(features[0].input_mask, dtype=int).reshape((1, -1))
 
-                word_id = torch.from_numpy(word_id)
-                word_mask = torch.from_numpy(word_mask)
+                word_id = torch.from_numpy(word_id).cuda()
+                word_mask = torch.from_numpy(word_mask).cuda()
 
                 all_encoder_layers, _ = textmodel(word_id, token_type_ids=None, attention_mask=word_mask)
                 bert_feature = (all_encoder_layers[-1][:,0,:] + all_encoder_layers[-2][:,0,:] + all_encoder_layers[-3][:,0,:] + all_encoder_layers[-4][:,0,:])/4
