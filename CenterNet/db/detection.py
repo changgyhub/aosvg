@@ -43,6 +43,7 @@ class DETECTION(BASE):
         self._configs["max_query_len"]   = 128
 
         self._configs["fix_visual"]      = False
+        self._configs["init_pooling"]      = False
 
         self._configs["test_scales"]     = [1]
 

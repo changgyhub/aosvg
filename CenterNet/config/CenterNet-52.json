@@ -57,6 +57,7 @@
         "bert_model": "bert-base-uncased",
         "max_query_len": 128,
 
-        "fix_visual": true
+        "fix_visual": true,
+        "init_pooling": true
     }
 }

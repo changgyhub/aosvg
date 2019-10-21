@@ -43,6 +43,7 @@ class NetworkFactory(object):
         self.loss    = nnet_module.loss
         self.network = Network(self.model, self.loss)
         self.network = DataParallel(self.network, chunk_sizes=system_configs.chunk_sizes).cuda()
+        self.init_pooling = db.configs["init_pooling"]
 
         total_params = 0
         for params in self.model.parameters():
@@ -124,6 +125,8 @@ class NetworkFactory(object):
             params = torch.load(f)
             model_state = self.model.state_dict()
             params = {k: v for k, v in params.items() if k in model_state and v.size() == model_state[k].size()}
+            if self.init_pooling:
+                params = {k: v for k, v in params.items() if 'kps' in k}
             for k in params:
                 print('Load {} with shape {}'.format(k, params[k].shape))
             model_state.update(params)
