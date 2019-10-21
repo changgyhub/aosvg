@@ -75,8 +75,10 @@ def _topk(scores, K=20):
 
 def _decode(
     tl_hm, br_hm, tl_tag, br_tag, tl_regr, br_regr, ct_hm, ct_regr, 
-    K=100, kernel=1, ae_threshold=1, num_dets=1000
+    K=100, kernel=1, ae_threshold=1
 ):
+    num_dets = int(K * K / 10)
+
     batch, cat, height, width = tl_hm.size()
 
     tl_hm = torch.sigmoid(tl_hm)
