@@ -3,6 +3,7 @@
 data/
 saved_models/
 ln_data/
+logs/
 
 # Apple
 .DS_Store
