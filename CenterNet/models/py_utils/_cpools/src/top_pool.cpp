@@ -2,9 +2,7 @@
 
 #include <vector>
 
-std::vector<at::Tensor> top_pool_forward(
-    at::Tensor input
-) {
+std::vector<at::Tensor> top_pool_forward(at::Tensor input) {
     // Initialize output
     at::Tensor output = at::zeros_like(input);
 
@@ -30,10 +28,7 @@ std::vector<at::Tensor> top_pool_forward(
     };
 }
 
-std::vector<at::Tensor> top_pool_backward(
-    at::Tensor input,
-    at::Tensor grad_output
-) {
+std::vector<at::Tensor> top_pool_backward(at::Tensor input, at::Tensor grad_output) {
     auto output = at::zeros_like(input);
 
     int32_t batch   = input.size(0);
