@@ -10,7 +10,7 @@
 
         "learning_rate": 0.00025,
         
-        "pretrain": "cache/nnet/CenterNet-52/CenterNet-52_999999.pkl",
+        "pretrain": "cache/nnet/CenterNet-52-original.pkl",
 
         "decay_rate": 10,
 
