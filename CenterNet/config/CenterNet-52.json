@@ -58,6 +58,7 @@
         "max_query_len": 128,
 
         "fix_visual": true,
-        "init_pooling": true
+        "init_pooling": false,
+        "fusion_over_attention": true
     }
 }

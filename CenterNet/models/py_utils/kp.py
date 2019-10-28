@@ -117,6 +117,7 @@ class kp(nn.Module):
         self.output_size        = self._db.configs["output_sizes"][0][0]
 
         self.fix_visual         = self._db.configs["fix_visual"]
+        self.fusion_over_attention = self._db.configs["fusion_over_attention"]
 
         curr_dim = dims[0]
 
@@ -252,15 +253,29 @@ class kp(nn.Module):
 
             # ============================================
             # Language Attention module
-            flang = self.mapping_lang(bert_feature)
-            flang = F.normalize(flang, p=2, dim=1)
-            flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
-            if self.coordmap:
-                coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
-                cnv = torch.cat([cnv, flang_tile, coord], dim=1)
+            # origingal conv: [N, C, H, W]
+            if self.fusion_over_attention:
+                flang = self.mapping_lang(bert_feature)
+                flang = F.normalize(flang, p=2, dim=1)
+                flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
+                if self.coordmap:
+                    coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
+                    cnv = torch.cat([cnv, flang_tile, coord], dim=1)
+                else:
+                    cnv = torch.cat([cnv, flang_tile], dim=1)
+                cnv = fusion_layer(cnv)  # [N, C, H, W]
             else:
-                cnv = torch.cat([cnv, flang_tile], dim=1)
-            cnv = fusion_layer(cnv)
+                flang = self.mapping_lang(bert_feature)
+                flang = F.normalize(flang, p=2, dim=1)
+                flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
+                if self.coordmap:
+                    coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
+                    att = torch.cat([cnv, flang_tile, coord], dim=1)
+                else:
+                    att = torch.cat([cnv, flang_tile], dim=1)
+                att = fusion_layer(att)  # [N, 1, H, W]
+                att = F.softmax(att, dim=1)  # [N, 1, H, W]
+                cnv = cnv * att  # [N, C, H, W]
             # ============================================     
 
             tl_cnv = tl_cnv_(cnv)
@@ -319,16 +334,30 @@ class kp(nn.Module):
 
             # ============================================
             # Language Attention module
-            flang = self.mapping_lang(bert_feature)
-            flang = F.normalize(flang, p=2, dim=1)
-            flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
-            if self.coordmap:
-                coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
-                cnv = torch.cat([cnv, flang_tile, coord], dim=1)
+            # origingal conv: [N, C, H, W]
+            if self.fusion_over_attention:
+                flang = self.mapping_lang(bert_feature)
+                flang = F.normalize(flang, p=2, dim=1)
+                flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
+                if self.coordmap:
+                    coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
+                    cnv = torch.cat([cnv, flang_tile, coord], dim=1)
+                else:
+                    cnv = torch.cat([cnv, flang_tile], dim=1)
+                cnv = fusion_layer(cnv)  # [N, C, H, W]
             else:
-                cnv = torch.cat([cnv, flang_tile], dim=1)
-            cnv = fusion_layer(cnv)
-            # ============================================     
+                flang = self.mapping_lang(bert_feature)
+                flang = F.normalize(flang, p=2, dim=1)
+                flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
+                if self.coordmap:
+                    coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
+                    att = torch.cat([cnv, flang_tile, coord], dim=1)
+                else:
+                    att = torch.cat([cnv, flang_tile], dim=1)
+                att = fusion_layer(att)  # [N, 1, H, W]
+                att = F.softmax(att, dim=1)  # [N, 1, H, W]
+                cnv = cnv * att  # [N, C, H, W]
+            # ============================================  
 
             if ind == self.nstack - 1:
                 tl_cnv = tl_cnv_(cnv)

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from .py_utils import kp, AELoss, _neg_loss, convolution, residual, make_cnv_layer
+from .py_utils import kp, AELoss, _neg_loss, convolution, residual, make_fusion_layer
 from .py_utils import TopPool, BottomPool, LeftPool, RightPool
 
 
@@ -161,7 +161,7 @@ class model(kp):
             nn.ReLU(),
         )
         self.fusion_layers = nn.ModuleList([
-            make_cnv_layer(fusion_dim, cnv_dim) for _ in range(nstack)
+            make_fusion_layer(fusion_dim, cnv_dim) for _ in range(nstack)
         ])
 
 

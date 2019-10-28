@@ -23,7 +23,7 @@
         "stepsize": 450000,
         "snapshot": 2500,
 
-        "chunk_sizes": [4, 4],
+        "chunk_sizes": [8],
 
         "data_dir": "data"
     },
@@ -58,6 +58,7 @@
         "max_query_len": 128,
 
         "fix_visual": true,
-        "init_pooling": false
+        "init_pooling": false,
+        "fusion_over_attention": false
     }
 }
