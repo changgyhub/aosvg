@@ -163,8 +163,8 @@ class model(kp):
         self.fusion_layers = nn.ModuleList([
             nn.Sequential(
                 convolution(3, fusion_dim, cnv_dim),
-                convolution(3, cnv_dim, int(torch.sqrt(cnv_dim))),
-                convolution(3, cnv_dim, 1),
+                convolution(3, cnv_dim, cnv_dim),
+                convolution(3, cnv_dim, cnv_dim),
             ) for _ in range(nstack)
         ])
 

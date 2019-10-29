@@ -59,6 +59,6 @@
 
         "fix_visual": true,
         "init_pooling": false,
-        "mechanism": "att"
+        "mechanism": "fuse"
     }
 }

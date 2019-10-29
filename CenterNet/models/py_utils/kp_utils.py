@@ -38,9 +38,6 @@ def make_inter_layer(dim):
 def make_cnv_layer(inp_dim, out_dim):
     return convolution(3, inp_dim, out_dim)
 
-def make_fusion_layer(inp_dim, out_dim):
-    return convolution(1, inp_dim, out_dim)
-
 def _gather_feat(feat, ind, mask=None):
     dim  = feat.size(2)
     ind  = ind.unsqueeze(2).expand(ind.size(0), ind.size(1), dim)

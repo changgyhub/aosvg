@@ -1,7 +1,7 @@
 {
     "system": {
         "dataset": "FLICKR",
-        "batch_size": 8,
+        "batch_size": 6,
         "sampling_function": "kp_detection",
 
         "train_split": "train",
@@ -23,7 +23,7 @@
         "stepsize": 450000,
         "snapshot": 2500,
 
-        "chunk_sizes": [4, 4],
+        "chunk_sizes": [6],
 
         "data_dir": "data"
     },
@@ -59,6 +59,6 @@
 
         "fix_visual": true,
         "init_pooling": false,
-        "fusion_over_attention": true
+        "mechanism": "none"
     }
 }
