@@ -146,7 +146,9 @@ class kp(nn.Module):
         # Language Attention module
         self.coordmap = self._db.configs["coordmap"]
         self.mapping_lang = lambda x: x
-        self.fusion_layers = lambda x: x
+        self.fusion_layers = nn.ModuleList([
+            nn.ReLU() for _ in range(nstack)
+        ])
         # ============================================
 
         self.tl_cnvs = nn.ModuleList([
