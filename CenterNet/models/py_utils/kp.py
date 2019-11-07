@@ -276,8 +276,8 @@ class kp(nn.Module):
                 else:
                     att = torch.cat([cnv, flang_tile], dim=1)
                 att = fusion_layer(att)  # [N, 1, H, W]
-                att = F.softmax(att, dim=1)  # [N, 1, H, W]
-                cnv = cnv * att  # [N, C, H, W]
+                att = F.softmax(att, dim=1)  # [N, 3, H, W]
+                # cnv = cnv * att  # [N, C, H, W]
             # ============================================     
 
             tl_cnv = tl_cnv_(cnv)
@@ -285,7 +285,13 @@ class kp(nn.Module):
             ct_cnv = ct_cnv_(cnv)
 
             tl_hm, br_hm, ct_hm = tl_hm_(tl_cnv), br_hm_(br_cnv), ct_hm_(ct_cnv)
-            tl_tag, br_tag        = tl_tag_(tl_cnv),  br_tag_(br_cnv)
+            
+            if self.mechanism == "att":
+                tl_hm = tl_hm * att[:, 0:1, :, :]
+                br_hm = br_hm * att[:, 1:2, :, :]
+                ct_hm = ct_hm * att[:, 2:3, :, :]
+            
+            tl_tag, br_tag  = tl_tag_(tl_cnv),  br_tag_(br_cnv)
             tl_regr, br_regr, ct_regr = tl_regr_(tl_cnv), br_regr_(br_cnv), ct_regr_(ct_cnv)
 
             tl_tag  = _tranpose_and_gather_feat(tl_tag, tl_inds)
@@ -357,9 +363,9 @@ class kp(nn.Module):
                 else:
                     att = torch.cat([cnv, flang_tile], dim=1)
                 att = fusion_layer(att)  # [N, 1, H, W]
-                att = F.softmax(att, dim=1)  # [N, 1, H, W]
-                cnv = cnv * att  # [N, C, H, W]
-            # ============================================ 
+                att = F.softmax(att, dim=1)  # [N, 3, H, W]
+                # cnv = cnv * att  # [N, C, H, W]
+            # ============================================  
 
             if ind == self.nstack - 1:
                 tl_cnv = tl_cnv_(cnv)
@@ -367,7 +373,13 @@ class kp(nn.Module):
                 ct_cnv = ct_cnv_(cnv)
 
                 tl_hm, br_hm, ct_hm = tl_hm_(tl_cnv), br_hm_(br_cnv), ct_hm_(ct_cnv)
-                tl_tag, br_tag        = tl_tag_(tl_cnv),  br_tag_(br_cnv)
+                
+                if self.mechanism == "att":
+                    tl_hm = tl_hm * att[:, 0:1, :, :]
+                    br_hm = br_hm * att[:, 1:2, :, :]
+                    ct_hm = ct_hm * att[:, 2:3, :, :]
+                
+                tl_tag, br_tag = tl_tag_(tl_cnv),  br_tag_(br_cnv)
                 tl_regr, br_regr, ct_regr = tl_regr_(tl_cnv), br_regr_(br_cnv), ct_regr_(ct_cnv)
 
                 outs += [tl_hm, br_hm, tl_tag, br_tag, tl_regr, br_regr,
