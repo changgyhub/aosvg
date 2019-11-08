@@ -56,12 +56,13 @@ def kp_decode(nnet, inputs,  K, ae_threshold=0.5, kernel=3):
     center = center.data.cpu().numpy()
     return detections, center
 
-def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode, partial=False):
+def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
     debug_dir = os.path.join(result_dir, "debug")
     if not os.path.exists(debug_dir):
         os.makedirs(debug_dir)
 
-    db_inds = db.db_inds[:100] if partial else db.db_inds
+    partial_num = 100
+    db_inds = db.db_inds[:partial_num] if debug else db.db_inds
 
     K             = db.configs["top_k"]
     ae_threshold  = db.configs["ae_threshold"]
@@ -89,7 +90,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode, parti
         db_ind = db_inds[ind]
         image_file = db.images[db_ind][0]
 
-        image, bert_feature, _ = db.detections(db_ind)
+        image, bert_feature, gt_detections = db.detections(db_ind)
 
         height, width = image.shape[0:2]
 
@@ -263,16 +264,23 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode, parti
             fig.axes.get_xaxis().set_visible(False)
             fig.axes.get_yaxis().set_visible(False)
 
-            keep_inds = (top_bboxes[db_ind][:, -1] >= 0.4)
-            for bbox in top_bboxes[db_ind][keep_inds]:
-                bbox  = bbox[0:4].astype(np.int32)
+            bbox = gt_detections.astype(np.int32)
+            xmin     = bbox[0]
+            ymin     = bbox[1]
+            xmax     = bbox[2]
+            ymax     = bbox[3]
+            ax.add_patch(plt.Rectangle((xmin, ymin),xmax - xmin, ymax - ymin, fill=False, edgecolor=bbox_color, linewidth=4.0))
+            ax.text(xmin+1, ymin-3, 'gt', bbox=dict(facecolor=bbox_color, ec='black', lw=2,alpha=0.5), fontsize=15, color='white', weight='bold')
+
+            if best_bboxes[db_ind]:
+                bbox = best_bboxes[db_ind].astype(np.int32)
                 xmin     = bbox[0]
                 ymin     = bbox[1]
                 xmax     = bbox[2]
                 ymax     = bbox[3]
                 ax.add_patch(plt.Rectangle((xmin, ymin),xmax - xmin, ymax - ymin, fill=False, edgecolor=bbox_color, linewidth=4.0))
-                ax.text(xmin+1, ymin-3, 'object', bbox=dict(facecolor=bbox_color, ec='black', lw=2,alpha=0.5), fontsize=15, color='white', weight='bold')
-
+                ax.text(xmin+1, ymin-3, 'pred', bbox=dict(facecolor=bbox_color, ec='black', lw=2,alpha=0.5), fontsize=15, color='white', weight='bold')
+            
             # debug_file1 = os.path.join(debug_dir, "{}.pdf".format(db_ind))
             debug_file2 = os.path.join(debug_dir, "{}.jpg".format(db_ind))
             # plt.savefig(debug_file1)
