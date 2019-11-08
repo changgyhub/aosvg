@@ -52,6 +52,7 @@ class FLICKR(DETECTION):
         self._label_file = self._label_file.format(self._dataset)
 
         self._image_dir  = os.path.join(data_dir, "flickr", "flickr30k_images")
+        self._image_file = os.path.join(self._image_dir, "{}")
 
         self._data = "flickr"
 
