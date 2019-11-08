@@ -90,7 +90,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
         db_ind = db_inds[ind]
         image_file = db.images[db_ind][0]
 
-        image, bert_feature, gt_detections = db.detections(db_ind)
+        image, bert_feature, gt_detections, phrase = db.detections_with_phrase(db_ind)
 
         height, width = image.shape[0:2]
 
@@ -257,9 +257,12 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
         if debug:
             image_file = db.image_file(db_ind)
             image      = cv2.imread(image_file)
+            phrase     = phrase[0]
             im         = image[:, :, (2, 1, 0)]
-            fig, ax    = plt.subplots(figsize=(12, 12)) 
-            fig        = ax.imshow(im, aspect='equal')
+            fig, ax    = plt.subplots(figsize=(28, 12)) 
+
+            plt.subplot(121)
+            fig = ax.imshow(im, aspect='equal')
             plt.axis('off')
             fig.axes.get_xaxis().set_visible(False)
             fig.axes.get_yaxis().set_visible(False)
@@ -270,7 +273,13 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             xmax = bbox[2]
             ymax = bbox[3]
             ax.add_patch(plt.Rectangle((xmin, ymin) ,xmax - xmin, ymax - ymin, fill=False, edgecolor=bbox_color, linewidth=4.0))
-            ax.text(xmin+1, ymin-3, 'gt', bbox=dict(facecolor=bbox_color, ec='black', lw=2,alpha=0.5), fontsize=15, color='white', weight='bold')
+            ax.text(xmin+1, ymin-3, phrase, bbox=dict(facecolor=bbox_color, ec='black', lw=2,alpha=0.5), fontsize=15, color='white', weight='bold')
+
+            plt.subplot(122)
+            fig = ax.imshow(im, aspect='equal')
+            plt.axis('off')
+            fig.axes.get_xaxis().set_visible(False)
+            fig.axes.get_yaxis().set_visible(False)
 
             if best_bboxes[db_ind] is not None:
                 bbox = best_bboxes[db_ind].astype(np.int32)
@@ -279,7 +288,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
                 xmax = bbox[2]
                 ymax = bbox[3]
                 ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, fill=False, edgecolor=bbox_color, linewidth=4.0))
-                ax.text(xmin+1, ymin-3, 'pred', bbox=dict(facecolor=bbox_color, ec='black', lw=2,alpha=0.5), fontsize=15, color='white', weight='bold')
+                ax.text(xmin+1, ymin-3, 'prediction', bbox=dict(facecolor=bbox_color, ec='black', lw=2,alpha=0.5), fontsize=15, color='white', weight='bold')
             
             # debug_file1 = os.path.join(debug_dir, "{}.pdf".format(db_ind))
             debug_file2 = os.path.join(debug_dir, "{}.jpg".format(db_ind))
