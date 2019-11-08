@@ -263,7 +263,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             plt.axis('off')
             fig.axes.get_xaxis().set_visible(False)
             fig.axes.get_yaxis().set_visible(False)
-
+            print(gt_detections)
             bbox = gt_detections.astype(np.int32)
             xmin     = bbox[0]
             ymin     = bbox[1]
