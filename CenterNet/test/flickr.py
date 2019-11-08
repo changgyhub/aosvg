@@ -59,7 +59,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
     if not os.path.exists(debug_dir):
         os.makedirs(debug_dir)
 
-    partial_num = 100
+    partial_num = 1000
     db_inds = db.db_inds[:partial_num] if debug else db.db_inds
 
     K             = db.configs["top_k"]
