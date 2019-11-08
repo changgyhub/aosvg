@@ -261,7 +261,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             im         = image[:, :, (2, 1, 0)]
             fig, ax    = plt.subplots(figsize=(28, 12)) 
 
-            plt.subplot(121)
+            ax = plt.subplot(121)
             fig = ax.imshow(im, aspect='equal')
             plt.axis('off')
             fig.axes.get_xaxis().set_visible(False)
@@ -275,7 +275,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             ax.add_patch(plt.Rectangle((xmin, ymin) ,xmax - xmin, ymax - ymin, fill=False, edgecolor=bbox_color, linewidth=4.0))
             ax.text(xmin+1, ymin-3, phrase, bbox=dict(facecolor=bbox_color, ec='black', lw=2,alpha=0.5), fontsize=15, color='white', weight='bold')
 
-            plt.subplot(122)
+            ax = plt.subplot(122)
             fig = ax.imshow(im, aspect='equal')
             plt.axis('off')
             fig.axes.get_xaxis().set_visible(False)
