@@ -80,8 +80,10 @@ class BASE(object):
     def image_file(self, ind):
         if self._image_file is None:
             raise ValueError("Image path is not initialized")
-
-        image_id = self._image_ids[ind]
+        if self._image_ids is None:  # for Flickr data loader
+            image_id = self.images[ind][0]
+        else:
+            image_id = self._image_ids[ind]
         return self._image_file.format(image_id)
 
     def write_result(self, ind, all_bboxes, all_scores):
