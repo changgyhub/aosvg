@@ -265,20 +265,20 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             fig.axes.get_yaxis().set_visible(False)
 
             bbox = gt_detections[0].astype(np.int32)
-            xmin     = bbox[0]
-            ymin     = bbox[1]
-            xmax     = bbox[2]
-            ymax     = bbox[3]
-            ax.add_patch(plt.Rectangle((xmin, ymin),xmax - xmin, ymax - ymin, fill=False, edgecolor=bbox_color, linewidth=4.0))
+            xmin = bbox[0]
+            ymin = bbox[1]
+            xmax = bbox[2]
+            ymax = bbox[3]
+            ax.add_patch(plt.Rectangle((xmin, ymin) ,xmax - xmin, ymax - ymin, fill=False, edgecolor=bbox_color, linewidth=4.0))
             ax.text(xmin+1, ymin-3, 'gt', bbox=dict(facecolor=bbox_color, ec='black', lw=2,alpha=0.5), fontsize=15, color='white', weight='bold')
 
             if best_bboxes[db_ind] is not None:
                 bbox = best_bboxes[db_ind].astype(np.int32)
-                xmin     = bbox[0]
-                ymin     = bbox[1]
-                xmax     = bbox[2]
-                ymax     = bbox[3]
-                ax.add_patch(plt.Rectangle((xmin, ymin),xmax - xmin, ymax - ymin, fill=False, edgecolor=bbox_color, linewidth=4.0))
+                xmin = bbox[0]
+                ymin = bbox[1]
+                xmax = bbox[2]
+                ymax = bbox[3]
+                ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, fill=False, edgecolor=bbox_color, linewidth=4.0))
                 ax.text(xmin+1, ymin-3, 'pred', bbox=dict(facecolor=bbox_color, ec='black', lw=2,alpha=0.5), fontsize=15, color='white', weight='bold')
             
             # debug_file1 = os.path.join(debug_dir, "{}.pdf".format(db_ind))
