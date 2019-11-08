@@ -15,8 +15,6 @@ from config import system_configs
 from utils import crop_image, normalize_
 from external.nms import soft_nms, soft_nms_merge
 
-bbox_color = np.random.rand(3)
-
 def _rescale_dets(detections, ratios, borders, sizes):
     xs, ys = detections[..., 0:4:2], detections[..., 1:4:2]
     xs    /= ratios[:, 1][:, None, None]
@@ -257,7 +255,6 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
         if debug:
             image_file = db.image_file(db_ind)
             image      = cv2.imread(image_file)
-            phrase     = phrase[0]
             im         = image[:, :, (2, 1, 0)]
             fig, ax    = plt.subplots(figsize=(28, 12)) 
 
@@ -272,8 +269,8 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             ymin = bbox[1]
             xmax = bbox[2]
             ymax = bbox[3]
-            ax.add_patch(plt.Rectangle((xmin, ymin) ,xmax - xmin, ymax - ymin, fill=False, edgecolor=bbox_color, linewidth=4.0))
-            ax.text(xmin+1, ymin-3, phrase, bbox=dict(facecolor=bbox_color, ec='black', lw=2,alpha=0.5), fontsize=15, color='white', weight='bold')
+            ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, fill=False, edgecolor='red', linewidth=5.0))
+            ax.text(xmin+1, ymin-3, phrase, bbox=dict(facecolor='red', ec='black', lw=2, alpha=0.5), fontsize=15, color='white', weight='bold')
 
             ax = plt.subplot(122)
             fig = ax.imshow(im, aspect='equal')
@@ -287,8 +284,8 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
                 ymin = bbox[1]
                 xmax = bbox[2]
                 ymax = bbox[3]
-                ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, fill=False, edgecolor=bbox_color, linewidth=4.0))
-                ax.text(xmin+1, ymin-3, 'prediction', bbox=dict(facecolor=bbox_color, ec='black', lw=2,alpha=0.5), fontsize=15, color='white', weight='bold')
+                ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, fill=False, edgecolor='red', linewidth=5.0))
+                ax.text(xmin+1, ymin-3, 'prediction', bbox=dict(facecolor='red', ec='black', lw=2, alpha=0.5), fontsize=15, color='white', weight='bold')
             
             # debug_file1 = os.path.join(debug_dir, "{}.pdf".format(db_ind))
             debug_file2 = os.path.join(debug_dir, "{}.jpg".format(db_ind))
