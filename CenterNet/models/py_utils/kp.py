@@ -275,8 +275,9 @@ class kp(nn.Module):
                     att = torch.cat([cnv, flang_tile, coord], dim=1)
                 else:
                     att = torch.cat([cnv, flang_tile], dim=1)
-                att = fusion_layer(att)  # [N, 1, H, W]
-                att = F.softmax(att, dim=1)  # [N, 3, H, W]
+                att = fusion_layer(att)  # [N, 3, H, W]
+                att = F.relu(att, dim=1)  # [N, 3, H, W]
+                # att = F.softmax(att, dim=1)  # [N, 3, H, W]
                 # cnv = cnv * att  # [N, C, H, W]
             # ============================================     
 
@@ -362,8 +363,9 @@ class kp(nn.Module):
                     att = torch.cat([cnv, flang_tile, coord], dim=1)
                 else:
                     att = torch.cat([cnv, flang_tile], dim=1)
-                att = fusion_layer(att)  # [N, 1, H, W]
-                att = F.softmax(att, dim=1)  # [N, 3, H, W]
+                att = fusion_layer(att)  # [N, 3, H, W]
+                att = F.relu(att, dim=1)  # [N, 3, H, W]
+                # att = F.softmax(att, dim=1)  # [N, 3, H, W]
                 # cnv = cnv * att  # [N, C, H, W]
             # ============================================  
 
