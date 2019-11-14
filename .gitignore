@@ -1,6 +1,7 @@
 # VG
 *.pkl
 data/
+results/
 saved_models/
 ln_data/
 logs/
