@@ -185,7 +185,7 @@ if __name__ == "__main__":
     system_configs.update_config(configs["system"])
 
     train_split = system_configs.train_split
-    val_split   = system_configs.test_split
+    val_split   = system_configs.val_split
 
     print("loading all datasets...")
     dataset = system_configs.dataset

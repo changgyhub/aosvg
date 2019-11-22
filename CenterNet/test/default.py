@@ -273,7 +273,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             im         = image[:, :, (2, 1, 0)]
             fig, ax    = plt.subplots(figsize=(28, 12)) 
 
-            ax = plt.subplot(131)
+            ax = plt.subplot(151)
             fig = ax.imshow(im, aspect='equal')
             plt.axis('off')
             fig.axes.get_xaxis().set_visible(False)
@@ -287,7 +287,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, fill=False, edgecolor='red', linewidth=5.0))
             ax.text(xmin+1, ymin-3, phrase, bbox=dict(facecolor='red', ec='black', lw=2, alpha=0.5), fontsize=15, color='white', weight='bold')
 
-            ax = plt.subplot(132)
+            ax = plt.subplot(152)
             fig = ax.imshow(im, aspect='equal')
             plt.axis('off')
             fig.axes.get_xaxis().set_visible(False)
@@ -302,13 +302,24 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
                 ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, fill=False, edgecolor='red', linewidth=5.0))
                 ax.text(xmin+1, ymin-3, 'prediction', bbox=dict(facecolor='red', ec='black', lw=2, alpha=0.5), fontsize=15, color='white', weight='bold')
             
-            ax = plt.subplot(133)
-            print(ct_hms.shape)
+            ax = plt.subplot(153)
+            ax.imshow(tl_hms[0], cmap='jet')
+            plt.axis('off')
+            fig.axes.get_xaxis().set_visible(False)
+            fig.axes.get_yaxis().set_visible(False)
+
+            ax = plt.subplot(154)
+            ax.imshow(br_hms[0], cmap='jet')
+            plt.axis('off')
+            fig.axes.get_xaxis().set_visible(False)
+            fig.axes.get_yaxis().set_visible(False)
+
+            ax = plt.subplot(155)
             ax.imshow(ct_hms[0], cmap='jet')
             plt.axis('off')
             fig.axes.get_xaxis().set_visible(False)
             fig.axes.get_yaxis().set_visible(False)
-            
+
             # debug_file1 = os.path.join(debug_dir, "{}.pdf".format(db_ind))
             debug_file2 = os.path.join(debug_dir, "{}.jpg".format(db_ind))
             # plt.savefig(debug_file1)

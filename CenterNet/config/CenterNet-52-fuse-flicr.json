@@ -1,16 +1,16 @@
 {
     "system": {
         "dataset": "FLICKR",
-        "batch_size": 4,
+        "batch_size": 6,
         "sampling_function": "kp_detection",
 
         "train_split": "train",
-        "val_split": "val",
+        "val_split": "test",
         "test_split": "test",
 
         "learning_rate": 0.00025,
         
-        "pretrain": "cache/nnet/CenterNet-104-original.pkl",
+        "pretrain": "cache/nnet/CenterNet-52-original.pkl",
 
         "decay_rate": 10,
 
@@ -23,7 +23,7 @@
         "stepsize": 450000,
         "snapshot": 2500,
 
-        "chunk_sizes": [4],
+        "chunk_sizes": [6],
 
         "data_dir": "data"
     },

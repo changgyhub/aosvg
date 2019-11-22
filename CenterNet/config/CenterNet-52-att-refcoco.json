@@ -1,12 +1,12 @@
 {
     "system": {
-        "dataset": "FLICKR",
+        "dataset": "REFCOCO",
         "batch_size": 6,
         "sampling_function": "kp_detection",
 
         "train_split": "train",
         "val_split": "val",
-        "test_split": "test",
+        "test_split": "testA",
 
         "learning_rate": 0.00025,
         
@@ -59,6 +59,6 @@
 
         "fix_visual": true,
         "init_pooling": false,
-        "mechanism": "none"
+        "mechanism": "att"
     }
 }
