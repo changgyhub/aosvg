@@ -190,7 +190,7 @@ def bbox_iou(box1, box2):
 
 
 class GROUNDING(DETECTION):
-    def __init__(self, db_config, split):
+    def __init__(self, db_config):
         super(GROUNDING, self).__init__(db_config)
         data_dir   = system_configs.data_dir
         result_dir = system_configs.result_dir
