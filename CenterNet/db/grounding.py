@@ -126,9 +126,11 @@ def cache_bert_feature(bert_model="bert-base-uncased", max_query_len=128, datase
 
         label_file = label_file_path.format(split)
         new_label_file = new_label_file_path.format(split)
+        print(label_file)
         images = torch.load(label_file)
         new_images = []
         for i in range(len(images)):
+            print(images[i])
             image_file, bbox, phrase = images[i]
 
             ## encode phrase to bert input
