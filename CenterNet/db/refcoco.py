@@ -35,9 +35,9 @@ def bbox_iou(box1, box2):
     return inter_area / (b1_area + b2_area - inter_area + 1e-16)
 
 
-class FLICKR(DETECTION):
+class REFCOCO(DETECTION):
     def __init__(self, db_config, split):
-        super(FLICKR, self).__init__(db_config)
+        super(REFCOCO, self).__init__(db_config)
         data_dir   = system_configs.data_dir
         result_dir = system_configs.result_dir
         cache_dir  = system_configs.cache_dir

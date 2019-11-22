@@ -108,7 +108,7 @@ def read_examples(input_line, unique_id):
     return examples
 
 
-if __name__ == "__main__":
+def flickr():
     with torch.no_grad():
         bert_model = "bert-base-uncased"
         max_query_len = 128
@@ -151,3 +151,7 @@ if __name__ == "__main__":
                     print("bert_feature:", bert_feature[:5], "... total of size", len(bert_feature))
 
             torch.save(new_images, new_label_file)
+
+
+if __name__ == "__main__":
+    flickr()

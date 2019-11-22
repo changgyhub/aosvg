@@ -49,10 +49,11 @@ def save_image(data, fn):
     plt.close()
 
 def kp_decode(nnet, inputs,  K, ae_threshold=0.5, kernel=3):
-    detections, center = nnet.test(inputs, ae_threshold=ae_threshold, K=K, kernel=kernel)
+    detections, center, heatmaps = nnet.test(inputs, ae_threshold=ae_threshold, K=K, kernel=kernel)
     detections = detections.data.cpu().numpy()
     center = center.data.cpu().numpy()
-    return detections, center
+    heatmaps = [heatmap.data.cpu().numpy() for heatmap in heatmaps]
+    return detections, center, heatmaps
 
 def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
     debug_dir = os.path.join(result_dir, "debug")
@@ -94,6 +95,9 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
 
         detections = []
         center_points = []
+        tl_hms = []
+        br_hms = []
+        ct_hms = []
 
         for scale in scales:
             new_height = int(height * scale)
@@ -132,14 +136,16 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
 
             images = torch.from_numpy(images)
             bert_features = torch.from_numpy(bert_features)
-            dets, center = decode_func(nnet, [images, bert_features], K, ae_threshold=ae_threshold, kernel=nms_kernel)
+            dets, center, heatmaps = decode_func(nnet, [images, bert_features], K, ae_threshold=ae_threshold, kernel=nms_kernel)
             dets   = dets.reshape(2, -1, 8)
             center = center.reshape(2, -1, 4)
             dets[1, :, [0, 2]] = out_width - dets[1, :, [2, 0]]
             center[1, :, [0]] = out_width - center[1, :, [0]]
             dets   = dets.reshape(1, -1, 8)
             center   = center.reshape(1, -1, 4)
-            
+
+            tl_hm, br_hm, ct_hm = heatmaps
+
             _rescale_dets(dets, ratios, borders, sizes)
             center [...,[0]] /= ratios[:, 1][:, None, None]
             center [...,[1]] /= ratios[:, 0][:, None, None] 
@@ -152,17 +158,26 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
 
             if scale == 1:
               center_points.append(center)
+              tl_hms.append(tl_hm)
+              br_hms.append(br_hm)
+              ct_hms.append(ct_hm)
             detections.append(dets)
 
         detections = np.concatenate(detections, axis=1)
         center_points = np.concatenate(center_points, axis=1)
+        tl_hms = np.concatenate(tl_hms, axis=1)
+        br_hms = np.concatenate(br_hms, axis=1)
+        ct_hms = np.concatenate(ct_hms, axis=1)
 
         classes    = detections[..., -1]
         classes    = classes[0]
         detections = detections[0]
         center_points = center_points[0]
+        tl_hms = tl_hms[0]
+        br_hms = br_hms[0]
+        ct_hms = ct_hms[0]
         
-        valid_ind = detections[:,4]> -1
+        valid_ind = detections[:, 4] > -1
         valid_detections = detections[valid_ind]
         
         box_width = valid_detections[:,2] - valid_detections[:,0]
@@ -258,7 +273,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             im         = image[:, :, (2, 1, 0)]
             fig, ax    = plt.subplots(figsize=(28, 12)) 
 
-            ax = plt.subplot(121)
+            ax = plt.subplot(131)
             fig = ax.imshow(im, aspect='equal')
             plt.axis('off')
             fig.axes.get_xaxis().set_visible(False)
@@ -272,7 +287,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, fill=False, edgecolor='red', linewidth=5.0))
             ax.text(xmin+1, ymin-3, phrase, bbox=dict(facecolor='red', ec='black', lw=2, alpha=0.5), fontsize=15, color='white', weight='bold')
 
-            ax = plt.subplot(122)
+            ax = plt.subplot(132)
             fig = ax.imshow(im, aspect='equal')
             plt.axis('off')
             fig.axes.get_xaxis().set_visible(False)
@@ -286,6 +301,13 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
                 ymax = bbox[3]
                 ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, fill=False, edgecolor='red', linewidth=5.0))
                 ax.text(xmin+1, ymin-3, 'prediction', bbox=dict(facecolor='red', ec='black', lw=2, alpha=0.5), fontsize=15, color='white', weight='bold')
+            
+            ax = plt.subplot(133)
+            print(ct_hms.shape)
+            ax.imshow(ct_hms[0], cmap='jet')
+            plt.axis('off')
+            fig.axes.get_xaxis().set_visible(False)
+            fig.axes.get_yaxis().set_visible(False)
             
             # debug_file1 = os.path.join(debug_dir, "{}.pdf".format(db_ind))
             debug_file2 = os.path.join(debug_dir, "{}.jpg".format(db_ind))

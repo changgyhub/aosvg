@@ -85,6 +85,8 @@ def _decode(
     br_hm = torch.sigmoid(br_hm)
     ct_hm = torch.sigmoid(ct_hm)
 
+    heatmaps = [tl_hm, br_hm, ct_hm]
+
     # perform nms on heatmaps
     tl_hm = _nms(tl_hm, kernel=kernel)
     br_hm = _nms(br_hm, kernel=kernel)
@@ -169,7 +171,7 @@ def _decode(
     
     center = torch.cat([ct_xs.unsqueeze(2), ct_ys.unsqueeze(2), ct_clses.float().unsqueeze(2), ct_scores.unsqueeze(2)], dim=2)
     detections = torch.cat([bboxes, scores, tl_scores, br_scores, clses], dim=2)
-    return detections, center
+    return detections, center, heatmaps
 
 def _neg_loss(preds, gt):
     pos_inds = gt.eq(1)

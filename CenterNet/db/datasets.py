@@ -1,5 +1,7 @@
-from db.flickr import FLICKR 
+from db.flickr import FLICKR
+from db.refcoco import REFCOCO
 
 datasets = {
-    "FLICKR": FLICKR
+    "FLICKR": FLICKR,
+    "REFCOCO": REFCOCO
 }
