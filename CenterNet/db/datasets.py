@@ -37,7 +37,7 @@ class FLICKR(GROUNDING):
         self._db_inds = np.arange(len(self.images))
 
 
-class REFCOCO(DETECTION):
+class REFCOCO(GROUNDING):
     def __init__(self, db_config, split):
         super(REFCOCO, self).__init__(db_config)
         data_dir   = system_configs.data_dir
@@ -62,7 +62,7 @@ class REFCOCO(DETECTION):
         self._db_inds = np.arange(len(self.images))
 
 
-class REFCOCOP(DETECTION):
+class REFCOCOP(GROUNDING):
     def __init__(self, db_config, split):
         super(REFCOCOP, self).__init__(db_config)
         data_dir   = system_configs.data_dir
@@ -87,7 +87,7 @@ class REFCOCOP(DETECTION):
         self._db_inds = np.arange(len(self.images))
 
 
-class REFCOCOG(DETECTION):
+class REFCOCOG(GROUNDING):
     def __init__(self, db_config, split):
         super(REFCOCOG, self).__init__(db_config)
         data_dir   = system_configs.data_dir
@@ -112,7 +112,7 @@ class REFCOCOG(DETECTION):
         self._db_inds = np.arange(len(self.images))
 
 
-class REFERIT(DETECTION):
+class REFERIT(GROUNDING):
     def __init__(self, db_config, split):
         super(REFERIT, self).__init__(db_config)
         data_dir   = system_configs.data_dir
