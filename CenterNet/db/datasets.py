@@ -127,7 +127,7 @@ class REFERIT(GROUNDING):
         self._label_file = self._label_file.format(self._dataset)
 
         if not os.path.exists(self._label_file):
-            cache_bert_feature(dataset_name="referit", label_dir=self._label_dir, splits=["train", "val", "test"])
+            cache_bert_feature(dataset_name="referit", label_dir=self._label_dir, split=split)
 
         self._image_dir  = os.path.join(data_dir, "referit", "images")
         self._image_file = os.path.join(self._image_dir, "{}")
