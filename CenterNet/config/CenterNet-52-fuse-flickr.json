@@ -1,6 +1,6 @@
 {
     "system": {
-        "dataset": "REFERIT",
+        "dataset": "FLICKR",
         "batch_size": 8,
         "sampling_function": "kp_detection",
 
@@ -8,9 +8,9 @@
         "val_split": "test",
         "test_split": "test",
 
-        "learning_rate": 0.00025,
+        "learning_rate": 0.0001,
         
-        "pretrain": "cache/nnet/CenterNet-52-fuse-referit/CenterNet-52-fuse-referit_55000.pkl",
+        "pretrain": "cache/nnet/CenterNet-52-fuse-flickr_best.pkl",
 
         "decay_rate": 10,
 
@@ -18,12 +18,12 @@
         "prefetch_size": 4,
         
         "display": 250,
-        "val_iter": 5000,
+        "val_iter": 2500,
         "max_iter": 480000,
         "stepsize": 450000,
-        "snapshot": 5000,
+        "snapshot": 2500,
 
-        "chunk_sizes": [4, 4],
+        "chunk_sizes":[4, 4],
 
         "data_dir": "data"
     },
