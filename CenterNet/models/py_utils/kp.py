@@ -149,6 +149,9 @@ class kp(nn.Module):
         self.fusion_layers = nn.ModuleList([
             nn.ReLU() for _ in range(nstack)
         ])
+        self.attention_layers = nn.ModuleList([
+            nn.ReLU() for _ in range(nstack)
+        ])
         # ============================================
 
         self.tl_cnvs = nn.ModuleList([
@@ -234,7 +237,8 @@ class kp(nn.Module):
             self.tl_tags,  self.br_tags,
             self.tl_regrs, self.br_regrs,
             self.ct_regrs,
-            self.fusion_layers
+            self.fusion_layers,
+            self.attention_layers
         )
         for ind, layer in enumerate(layers):
             kp_, cnv_          = layer[0:2]
@@ -245,6 +249,7 @@ class kp(nn.Module):
             tl_regr_,  br_regr_ = layer[10:12]
             ct_regr_         = layer[12]
             fusion_layer = layer[13]
+            attention_layer = layer[14]
 
             # # We fix the feature extracter with pre-trained model.
             # with torch.no_grad():
@@ -253,39 +258,28 @@ class kp(nn.Module):
                 kp = kp.detach()
             cnv = cnv_(kp)
 
-            # ============================================
-            # Language Attention module
             # origingal conv: [N, C, H, W]
-            if self.mechanism == "fuse":
+            if self.mechanism is not None:
                 flang = self.mapping_lang(bert_feature)
                 flang = F.normalize(flang, p=2, dim=1)
                 flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
                 if self.coordmap:
                     coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
-                    cnv = torch.cat([cnv, flang_tile, coord], dim=1)
+                    multimodal = torch.cat([cnv, flang_tile, coord], dim=1)
                 else:
-                    cnv = torch.cat([cnv, flang_tile], dim=1)
-                cnv = fusion_layer(cnv)  # [N, C, H, W]
-            elif self.mechanism == "att":
-                flang = self.mapping_lang(bert_feature)
-                flang = F.normalize(flang, p=2, dim=1)
-                flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
-                if self.coordmap:
-                    coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
-                    att = torch.cat([cnv, flang_tile, coord], dim=1)
-                else:
-                    att = torch.cat([cnv, flang_tile], dim=1)
-                att = fusion_layer(att)  # [N, 3, H, W]
-                att = F.relu(att)  # [N, 3, H, W]
-                # att = F.softmax(att, dim=1)  # [N, 3, H, W]
-                # cnv = cnv * att  # [N, C, H, W]
-            # ============================================     
+                    multimodal = torch.cat([cnv, flang_tile], dim=1)
+
+            if self.mechanism == "fuse" or self.mechanism == "all":
+                cnv = fusion_layer(multimodal)  # [N, C, H, W]
 
             tl_cnv = tl_cnv_(cnv)
             br_cnv = br_cnv_(cnv)
             ct_cnv = ct_cnv_(cnv)
 
-            if self.mechanism == "att":
+            if self.mechanism == "att" or self.mechanism == "all":
+                att = attention_layer(multimodal)  # [N, 3, H, W]
+                att = F.relu(att)  # [N, 3, H, W]
+                # att = F.softmax(att, dim=1)  # [N, 3, H, W]
                 tl_cnv = tl_cnv * att[:, 0:1, :, :]
                 br_cnv = br_cnv * att[:, 1:2, :, :]
                 ct_cnv = ct_cnv * att[:, 2:3, :, :]
@@ -325,7 +319,8 @@ class kp(nn.Module):
             self.tl_tags,  self.br_tags,
             self.tl_regrs, self.br_regrs,
             self.ct_regrs,
-            self.fusion_layers
+            self.fusion_layers,
+            self.attention_layers
         )
         for ind, layer in enumerate(layers):
             kp_, cnv_          = layer[0:2]
@@ -336,44 +331,34 @@ class kp(nn.Module):
             tl_regr_,  br_regr_ = layer[10:12]
             ct_regr_         = layer[12]
             fusion_layer = layer[13]
+            attention_layer = layer[14]
 
             kp  = kp_(inter)
             cnv = cnv_(kp)
 
-            # ============================================
-            # Language Attention module
-            # origingal conv: [N, C, H, W]
-            if self.mechanism == "fuse":
+             # origingal conv: [N, C, H, W]
+            if self.mechanism is not None:
                 flang = self.mapping_lang(bert_feature)
                 flang = F.normalize(flang, p=2, dim=1)
                 flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
                 if self.coordmap:
                     coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
-                    cnv = torch.cat([cnv, flang_tile, coord], dim=1)
+                    multimodal = torch.cat([cnv, flang_tile, coord], dim=1)
                 else:
-                    cnv = torch.cat([cnv, flang_tile], dim=1)
-                cnv = fusion_layer(cnv)  # [N, C, H, W]
-            elif self.mechanism == "att":
-                flang = self.mapping_lang(bert_feature)
-                flang = F.normalize(flang, p=2, dim=1)
-                flang_tile = flang.view(flang.size(0), flang.size(1), 1, 1).repeat(1, 1, cnv.shape[2], cnv.shape[3])
-                if self.coordmap:
-                    coord = generate_coord(cnv.shape[0], cnv.shape[2], cnv.shape[3])
-                    att = torch.cat([cnv, flang_tile, coord], dim=1)
-                else:
-                    att = torch.cat([cnv, flang_tile], dim=1)
-                att = fusion_layer(att)  # [N, 3, H, W]
-                att = F.relu(att)  # [N, 3, H, W]
-                # att = F.softmax(att, dim=1)  # [N, 3, H, W]
-                # cnv = cnv * att  # [N, C, H, W]
-            # ============================================  
+                    multimodal = torch.cat([cnv, flang_tile], dim=1)
+
+            if self.mechanism == "fuse" or self.mechanism == "all":
+                cnv = fusion_layer(multimodal)  # [N, C, H, W]
 
             if ind == self.nstack - 1:
                 tl_cnv = tl_cnv_(cnv)
                 br_cnv = br_cnv_(cnv)
                 ct_cnv = ct_cnv_(cnv)
 
-                if self.mechanism == "att":
+                if self.mechanism == "att" or self.mechanism == "all":
+                    att = attention_layer(multimodal)  # [N, 3, H, W]
+                    att = F.relu(att)  # [N, 3, H, W]
+                    # att = F.softmax(att, dim=1)  # [N, 3, H, W]
                     tl_cnv = tl_cnv * att[:, 0:1, :, :]
                     br_cnv = br_cnv * att[:, 1:2, :, :]
                     ct_cnv = ct_cnv * att[:, 2:3, :, :]

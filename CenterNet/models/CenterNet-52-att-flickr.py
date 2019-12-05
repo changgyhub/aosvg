@@ -160,7 +160,7 @@ class model(kp):
             nn.BatchNorm1d(emb_size),
             nn.ReLU(),
         )
-        self.fusion_layers = nn.ModuleList([
+        self.attention_layers = nn.ModuleList([
             nn.Sequential(
                 convolution(3, fusion_dim, cnv_dim),
                 convolution(3, cnv_dim, cnv_dim),

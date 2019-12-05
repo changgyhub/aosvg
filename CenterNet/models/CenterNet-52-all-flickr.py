@@ -134,7 +134,7 @@ class model(kp):
         modules = [2, 2, 2, 2, 2, 4]
         out_dim = 1
         cnv_dim = 256
-        nstack = 2
+        nstack = 1
         super(model, self).__init__(
             db, n, nstack, dims, modules, out_dim,
             make_tl_layer=make_tl_layer,
@@ -160,11 +160,18 @@ class model(kp):
             nn.BatchNorm1d(emb_size),
             nn.ReLU(),
         )
-        self.fusion_layers = nn.ModuleList([
+        self.attention_layers = nn.ModuleList([
             nn.Sequential(
                 convolution(3, fusion_dim, cnv_dim),
                 convolution(3, cnv_dim, cnv_dim),
                 convolution(3, cnv_dim, 3)
+            ) for _ in range(nstack)
+        ])
+        self.fusion_layers = nn.ModuleList([
+            nn.Sequential(
+                convolution(3, fusion_dim, cnv_dim),
+                convolution(3, cnv_dim, cnv_dim),
+                convolution(3, cnv_dim, cnv_dim),
             ) for _ in range(nstack)
         ])
 
