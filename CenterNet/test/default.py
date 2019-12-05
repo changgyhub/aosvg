@@ -60,7 +60,7 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
     if not os.path.exists(debug_dir):
         os.makedirs(debug_dir)
 
-    partial_num = 1000
+    partial_num = 3000
     db_inds = db.db_inds[:partial_num] if debug else db.db_inds
 
     K             = db.configs["top_k"]
@@ -273,20 +273,6 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
             im         = image[:, :, (2, 1, 0)]
             fig, ax    = plt.subplots(figsize=(28, 12)) 
 
-            ax = plt.subplot(151)
-            fig = ax.imshow(im, aspect='equal')
-            plt.axis('off')
-            fig.axes.get_xaxis().set_visible(False)
-            fig.axes.get_yaxis().set_visible(False)
-
-            bbox = gt_detections[0].astype(np.int32)
-            xmin = bbox[0]
-            ymin = bbox[1]
-            xmax = bbox[2]
-            ymax = bbox[3]
-            ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, fill=False, edgecolor='red', linewidth=5.0))
-            ax.text(xmin+1, ymin-3, phrase, bbox=dict(facecolor='red', ec='black', lw=2, alpha=0.5), fontsize=15, color='white', weight='bold')
-
             ax = plt.subplot(152)
             fig = ax.imshow(im, aspect='equal')
             plt.axis('off')
@@ -301,6 +287,20 @@ def kp_detection(db, nnet, result_dir, debug=False, decode_func=kp_decode):
                 ymax = bbox[3]
                 ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, fill=False, edgecolor='red', linewidth=5.0))
                 ax.text(xmin+1, ymin-3, 'prediction', bbox=dict(facecolor='red', ec='black', lw=2, alpha=0.5), fontsize=15, color='white', weight='bold')
+            
+            ax = plt.subplot(151)
+            fig = ax.imshow(im, aspect='equal')
+            plt.axis('off')
+            fig.axes.get_xaxis().set_visible(False)
+            fig.axes.get_yaxis().set_visible(False)
+
+            bbox = gt_detections[0].astype(np.int32)
+            xmin = bbox[0]
+            ymin = bbox[1]
+            xmax = bbox[2]
+            ymax = bbox[3]
+            ax.add_patch(plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin, fill=False, edgecolor='red', linewidth=5.0))
+            ax.text(xmin+1, ymin-3, phrase, bbox=dict(facecolor='red', ec='black', lw=2, alpha=0.5), fontsize=15, color='white', weight='bold')
             
             ax = plt.subplot(153)
             ax.imshow(tl_hms[0], cmap='jet')

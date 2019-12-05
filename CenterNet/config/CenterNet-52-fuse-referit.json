@@ -5,7 +5,7 @@
         "sampling_function": "kp_detection",
 
         "train_split": "train",
-        "val_split": "test",
+        "val_split": "val",
         "test_split": "test",
 
         "learning_rate": 0.00025,
